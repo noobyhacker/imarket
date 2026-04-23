@@ -1,18 +1,22 @@
-import { getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getCurrentUser } from '@/lib/queries';
-import ChatListClient from '@/components/chat/ChatListClient';
-import BottomNav from '@/components/BottomNav';
+import ChatDetailClient from '@/components/chat/ChatDetailClient';
+import type { Conversation, Message } from '@/types';
 
-export default async function ChatPage() {
-  const t = await getTranslations('chat');
-  const user = await getCurrentUser();
+interface ChatDetailPageProps {
+  params: { id: string };
+}
 
-  if (!user) return null;
+export default async function ChatDetailPage({ params }: ChatDetailPageProps) {
+  const [supabase, user] = await Promise.all([
+    createServerSupabaseClient(),
+    getCurrentUser(),
+  ]);
 
-  const supabase = await createServerSupabaseClient();
+  if (!user) notFound();
 
-  const { data: conversations } = await supabase
+  const { data } = await supabase
     .from('conversations')
     .select(`
       *,
@@ -20,22 +24,30 @@ export default async function ChatPage() {
       buyer:users!conversations_buyer_id_fkey(*),
       seller:users!conversations_seller_id_fkey(*)
     `)
-    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-    .order('last_message_at', { ascending: false });
+    .eq('id', params.id)
+    .single();
+
+  const conversation = data as unknown as Conversation;
+
+  if (!conversation) notFound();
+
+  if (conversation.buyer_id !== user.id && conversation.seller_id !== user.id) {
+    notFound();
+  }
+
+  const { data: messagesData } = await supabase
+    .from('messages')
+    .select('*, sender:users(*)')
+    .eq('conversation_id', params.id)
+    .order('created_at', { ascending: true });
+
+  const messages = (messagesData ?? []) as unknown as Message[];
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto max-w-lg">
-          <h1 className="text-lg font-bold text-foreground">{t('title')}</h1>
-        </div>
-      </header>
-      <ChatListClient
-        conversations={conversations ?? []}
-        currentUserId={user.id}
-        emptyMessage={t('empty')}
-      />
-      <BottomNav />
-    </div>
+    <ChatDetailClient
+      conversation={conversation}
+      initialMessages={messages}
+      currentUser={user}
+    />
   );
 }
