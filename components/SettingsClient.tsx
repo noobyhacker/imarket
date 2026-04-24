@@ -25,7 +25,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     setSaving(true);
     setError('');
     const supabase = createClient();
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('users')
       .update({ nickname: nickname.trim(), location: location.trim() || null, language })
       .eq('id', user.id);
