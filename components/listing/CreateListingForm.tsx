@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, ChevronDown } from 'lucide-react';
+import { Camera, ChevronDown, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ const CATEGORIES: ListingCategory[] = [
   'home_appliances', 'books', 'services', 'other',
 ];
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 interface CreateListingFormProps {
   userId: string;
@@ -22,8 +22,6 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const router = useRouter();
   const t = useTranslations('create');
   const tCategories = useTranslations('categories');
-  const tValidation = useTranslations('validation');
-  const tErrors = useTranslations('errors');
 
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
@@ -42,7 +40,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
 
     for (const file of files) {
       if (file.size > MAX_IMAGE_SIZE) {
-        setError(tErrors('imageSize'));
+        setError('Image must be under 5MB');
         return;
       }
       valid.push(file);
@@ -51,29 +49,47 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
 
     setImageFiles((prev) => [...prev, ...valid].slice(0, 5));
     setImagePreviews((prev) => [...prev, ...previews].slice(0, 5));
+    setError('');
+  };
+
+  const removeImage = (i: number) => {
+    setImageFiles((prev) => prev.filter((_, idx) => idx !== i));
+    setImagePreviews((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const handlePost = async () => {
-    if (!title || !price || !category || !location || !description) return;
+    if (!title || !price || !category || !location || !description) {
+      setError('Please fill in all fields');
+      return;
+    }
+    if (!userId) {
+      setError('You must be logged in to post a listing');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const supabase = createClient();
 
-      // 1. Upload images
+      // 1. Upload images (skip if none)
       const imagePaths: string[] = [];
       for (const file of imageFiles) {
-        const ext = file.name.split('.').pop();
+        const ext = file.name.split('.').pop() ?? 'jpg';
         const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from('listings')
           .upload(path, file, { cacheControl: '3600', upsert: false });
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          setError(`Image upload failed: ${uploadError.message}`);
+          setLoading(false);
+          return;
+        }
         imagePaths.push(path);
       }
 
-      // 2. Translate via API route (DeepL — user-generated content only)
+      // 2. Translate (optional — don't block on failure)
       let titleTranslated: string | null = null;
       let descTranslated: string | null = null;
       try {
@@ -87,7 +103,9 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           titleTranslated = data.translations?.[0] ?? null;
           descTranslated = data.translations?.[1] ?? null;
         }
-      } catch {}
+      } catch {
+        // Translation failure is non-fatal — proceed without it
+      }
 
       // 3. Insert listing
       const { data: listing, error: insertError } = await supabase
@@ -110,16 +128,19 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
         .single();
 
       if (insertError) {
-        // Rollback images
+        // Rollback uploaded images
         for (const path of imagePaths) {
           await supabase.storage.from('listings').remove([path]);
         }
-        throw insertError;
+        setError(`Failed to post listing: ${insertError.message}`);
+        setLoading(false);
+        return;
       }
 
       router.push(`/listing/${listing.id}`);
-    } catch (err) {
-      setError(tErrors('connection'));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Error: ${msg}`);
       setLoading(false);
     }
   };
@@ -127,36 +148,45 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   return (
     <div className="mx-auto max-w-lg px-4 py-5">
       {/* Image upload */}
-      <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-secondary/50 transition-colors hover:border-primary/30 overflow-hidden relative">
-        {imagePreviews.length > 0 ? (
-          <div className="flex h-full w-full gap-1 overflow-hidden">
-            {imagePreviews.map((src, i) => (
-              <img key={i} src={src} alt="" className="h-full flex-1 object-cover" />
-            ))}
-          </div>
-        ) : (
-          <>
-            <Camera size={28} className="text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">{t('addPhotos')}</span>
-          </>
-        )}
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-      </label>
+      <div className="mb-2">
+        <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-secondary/50 transition-colors hover:border-primary/40">
+          <Camera size={28} className="text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">{t('addPhotos')}</span>
+          <span className="text-xs text-muted-foreground/60">Up to 5 photos, max 5MB each</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+        </label>
+      </div>
 
-      {error && (
-        <p className="mt-3 rounded-xl bg-destructive/10 px-4 py-2.5 text-sm text-destructive">{error}</p>
+      {/* Image previews */}
+      {imagePreviews.length > 0 && (
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          {imagePreviews.map((src, i) => (
+            <div key={i} className="relative flex-shrink-0">
+              <img src={src} alt="" className="h-20 w-20 rounded-xl object-cover" />
+              <button
+                onClick={() => removeImage(i)}
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
+              >
+                <X size={11} />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
-      <div className="mt-6 space-y-5">
-        {/* Title */}
+      {error && (
+        <p className="mb-4 rounded-xl bg-destructive/10 px-4 py-2.5 text-sm text-destructive">{error}</p>
+      )}
+
+      <div className="space-y-5">
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('titleLabel')}</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('titleLabel')}</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -165,9 +195,8 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           />
         </div>
 
-        {/* Price */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('priceLabel')}</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('priceLabel')}</label>
           <input
             value={price}
             onChange={(e) => setPrice(e.target.value.replace(/\D/g, ''))}
@@ -178,9 +207,8 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           />
         </div>
 
-        {/* Category */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('categoryLabel')}</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('categoryLabel')}</label>
           <div className="relative">
             <select
               value={category}
@@ -196,9 +224,8 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           </div>
         </div>
 
-        {/* Location */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('locationLabel')}</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('locationLabel')}</label>
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -207,9 +234,8 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           />
         </div>
 
-        {/* Description */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('descriptionLabel')}</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('descriptionLabel')}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -219,7 +245,6 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           />
         </div>
 
-        {/* Submit */}
         <button
           onClick={handlePost}
           disabled={!title || !price || !category || !location || !description || loading}
