@@ -47,7 +47,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     const path = `${user.id}/avatar.${ext}`;
     const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (uploadErr) { setError(uploadErr.message); return; }
-    await supabase.from('users').update({ avatar_url: path }).eq('id', user.id);
+    await (supabase as any).from('users').update({ avatar_url: path }).eq('id', user.id);
     router.refresh();
   };
 
