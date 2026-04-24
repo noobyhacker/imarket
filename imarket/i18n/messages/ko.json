@@ -1,0 +1,208 @@
+{
+  "nav": {
+    "home": "홈",
+    "sell": "판매",
+    "chat": "채팅",
+    "profile": "나의",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "myStore": "내 상점",
+    "admin": "관리자"
+  },
+  "listings": {
+    "empty": "아직 등록된 상품이 없습니다",
+    "search": "근처 물건 검색...",
+    "filterNearby": "근처",
+    "filterEnglish": "영어 가능",
+    "filterRecent": "최근 등록",
+    "sortNewest": "최신순",
+    "sortPriceLow": "낮은 가격순",
+    "sortPriceHigh": "높은 가격순",
+    "category": "카테고리",
+    "location": "위치",
+    "allCategories": "전체 카테고리",
+    "chatWithSeller": "판매자와 채팅",
+    "englishFriendly": "영어 가능",
+    "foreignerSafe": "외국인 안전 거래",
+    "postedBy": "판매자",
+    "relatedListings": "이 판매자의 다른 상품",
+    "activeListings": "판매중",
+    "soldListings": "판매완료"
+  },
+  "categories": {
+    "electronics": "전자기기",
+    "furniture": "가구",
+    "clothing": "의류",
+    "vehicles": "차량",
+    "home_appliances": "가전제품",
+    "books": "도서",
+    "services": "서비스",
+    "other": "기타"
+  },
+  "create": {
+    "title": "상품 등록",
+    "titleLabel": "제목",
+    "titlePlaceholder": "무엇을 판매하시나요?",
+    "descriptionLabel": "설명",
+    "descriptionPlaceholder": "상품 상태, 거래 방법 등을 설명해주세요...",
+    "priceLabel": "가격 (₩)",
+    "pricePlaceholder": "0",
+    "categoryLabel": "카테고리",
+    "categoryPlaceholder": "카테고리 선택",
+    "locationLabel": "위치",
+    "locationPlaceholder": "예: 홍대, 서울",
+    "addPhotos": "사진 추가",
+    "postButton": "등록하기",
+    "posting": "등록 중...",
+    "successTitle": "등록 완료!",
+    "successMessage": "상품이 등록되었습니다."
+  },
+  "chat": {
+    "title": "메시지",
+    "empty": "아직 대화가 없습니다",
+    "start": "판매자와 채팅",
+    "send": "전송",
+    "placeholder": "메시지를 입력하세요...",
+    "activeNow": "활성",
+    "typing": "입력 중...",
+    "seen": "읽음"
+  },
+  "translation": {
+    "showOriginal": "원문 보기",
+    "showTranslated": "번역 보기",
+    "originalLanguage": "원문",
+    "pending": "번역 중...",
+    "autoTranslateOn": "자동번역 ON",
+    "translate": "번역"
+  },
+  "profile": {
+    "title": "내 프로필",
+    "listings": "상품",
+    "reviews": "후기",
+    "trustScore": "신뢰 점수",
+    "active": "판매중",
+    "sold": "판매완료",
+    "noListings": "아직 등록된 상품이 없습니다",
+    "joinedDate": "가입일",
+    "editProfile": "프로필 수정",
+    "myStore": "내 상점",
+    "requestStore": "상점 열기"
+  },
+  "store": {
+    "empty": "이 상점에는 상품이 없습니다",
+    "requestTitle": "상점 열기",
+    "requestName": "상점명",
+    "requestDescription": "설명",
+    "requestLogo": "로고",
+    "requestButton": "신청하기",
+    "pendingMessage": "상점 신청이 검토 중입니다.",
+    "rejectedMessage": "상점 신청이 거절되었습니다."
+  },
+  "admin": {
+    "title": "관리자 대시보드",
+    "listings": "상품",
+    "storeRequests": "상점 신청",
+    "users": "사용자",
+    "approve": "승인",
+    "reject": "거절",
+    "delete": "삭제",
+    "confirmDelete": "이 상품을 삭제하시겠습니까?",
+    "confirmDeleteButton": "삭제",
+    "cancelButton": "취소",
+    "status": "상태",
+    "pending": "대기중",
+    "approved": "승인됨",
+    "rejected": "거절됨",
+    "active": "판매중",
+    "sold": "판매완료",
+    "user": "사용자",
+    "email": "이메일",
+    "joinedDate": "가입일",
+    "noData": "데이터 없음"
+  },
+  "auth": {
+    "loginTitle": "다시 오신 것을 환영합니다",
+    "loginSubtitle": "iMarket 계정에 로그인하세요",
+    "signupTitle": "iMarket 가입",
+    "signupSubtitle": "계정을 만들고 거래를 시작하세요",
+    "emailLabel": "이메일",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "비밀번호",
+    "passwordPlaceholder": "비밀번호",
+    "nicknameLabel": "닉네임",
+    "nicknamePlaceholder": "표시 이름",
+    "loginButton": "로그인",
+    "signupButton": "계정 만들기",
+    "loginLoading": "로그인 중...",
+    "signupLoading": "계정 생성 중...",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "signupLink": "회원가입",
+    "loginLink": "로그인"
+  },
+  "errors": {
+    "connection": "연결 오류. 다시 시도해주세요.",
+    "notFound": "찾을 수 없습니다",
+    "notFoundMessage": "이 페이지는 존재하지 않습니다.",
+    "imageSize": "이미지는 5MB 이하여야 합니다",
+    "imageType": "JPG, PNG, WEBP 이미지만 허용됩니다",
+    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해주세요.",
+    "unauthorized": "권한이 없습니다."
+  },
+  "validation": {
+    "title": {
+      "min": "제목은 2자 이상이어야 합니다",
+      "max": "제목은 100자 이하여야 합니다",
+      "required": "제목을 입력해주세요"
+    },
+    "description": {
+      "min": "설명은 10자 이상이어야 합니다",
+      "required": "설명을 입력해주세요"
+    },
+    "price": {
+      "positive": "가격은 0보다 커야 합니다",
+      "required": "가격을 입력해주세요"
+    },
+    "category": {
+      "required": "카테고리를 선택해주세요"
+    },
+    "location": {
+      "required": "위치를 입력해주세요"
+    },
+    "email": {
+      "invalid": "올바른 이메일을 입력해주세요",
+      "required": "이메일을 입력해주세요"
+    },
+    "password": {
+      "min": "비밀번호는 6자 이상이어야 합니다",
+      "required": "비밀번호를 입력해주세요"
+    },
+    "nickname": {
+      "min": "닉네임은 2자 이상이어야 합니다",
+      "required": "닉네임을 입력해주세요"
+    }
+  },
+  "time": {
+    "justNow": "방금 전",
+    "minutesAgo": "{count}분 전",
+    "hoursAgo": "{count}시간 전",
+    "hoursAgoPlural": "{count}시간 전",
+    "yesterday": "어제",
+    "daysAgo": "{count}일 전"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "save": "저장",
+    "cancel": "취소",
+    "edit": "수정",
+    "delete": "삭제",
+    "back": "뒤로",
+    "submit": "제출",
+    "search": "검색",
+    "filter": "필터",
+    "sort": "정렬",
+    "close": "닫기",
+    "won": "₩"
+  }
+}
