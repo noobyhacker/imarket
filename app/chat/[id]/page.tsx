@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getCurrentUser } from '@/lib/queries';
 import ChatDetailClient from '@/components/chat/ChatDetailClient';
+import type { Conversation, Message } from '@/types';
 
 interface ChatDetailPageProps {
   params: { id: string };
@@ -15,7 +16,7 @@ export default async function ChatDetailPage({ params }: ChatDetailPageProps) {
 
   if (!user) notFound();
 
-  const { data: conversation } = await supabase
+  const { data } = await supabase
     .from('conversations')
     .select(`
       *,
@@ -26,23 +27,26 @@ export default async function ChatDetailPage({ params }: ChatDetailPageProps) {
     .eq('id', params.id)
     .single();
 
+  const conversation = data as unknown as Conversation;
+
   if (!conversation) notFound();
 
-  // Only buyer or seller can view
   if (conversation.buyer_id !== user.id && conversation.seller_id !== user.id) {
     notFound();
   }
 
-  const { data: messages } = await supabase
+  const { data: messagesData } = await supabase
     .from('messages')
     .select('*, sender:users(*)')
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true });
 
+  const messages = (messagesData ?? []) as unknown as Message[];
+
   return (
     <ChatDetailClient
       conversation={conversation}
-      initialMessages={messages ?? []}
+      initialMessages={messages}
       currentUser={user}
     />
   );
