@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
-import type { TablesInsert } from '@/types/database.types';
 import Link from 'next/link';
 
 export default function SignupForm() {
@@ -40,14 +39,13 @@ export default function SignupForm() {
 
     if (data.user) {
       // Create user profile row
-      const userPayload: TablesInsert<'users'> = {
+      await supabase.from('users').insert({
         id: data.user.id,
         email,
         nickname,
         language: navigator.language.startsWith('ko') ? 'ko' : 'en',
         languages: [],
-      };
-      await supabase.from('users').insert(userPayload);
+      });
     }
 
     router.push('/');
