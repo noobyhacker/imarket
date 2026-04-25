@@ -39,13 +39,13 @@ export default function SignupForm() {
 
     if (data.user) {
       // Create user profile row
-      await supabase.from('users').insert({
+      await supabase.from('users').insert(({
         id: data.user.id,
         email,
         nickname,
         language: navigator.language.startsWith('ko') ? 'ko' : 'en',
         languages: [],
-      });
+      }) as any);
     }
 
     router.push('/');

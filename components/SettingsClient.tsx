@@ -27,7 +27,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     const supabase = createClient();
     const { error: updateError } = await supabase
       .from('users')
-      .update({ nickname: nickname.trim(), location: location.trim() || null, language })
+      .update({ nickname: nickname.trim(), location: location.trim() || null, language } as any)
       .eq('id', user.id);
     if (updateError) {
       setError(updateError.message);
@@ -47,7 +47,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     const path = `${user.id}/avatar.${ext}`;
     const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (uploadErr) { setError(uploadErr.message); return; }
-    await supabase.from('users').update({ avatar_url: path }).eq('id', user.id);
+    await supabase.from('users').update({ avatar_url: path } as any).eq('id', user.id);
     router.refresh();
   };
 
