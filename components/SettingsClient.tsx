@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { getAvatarUrl } from '@/lib/utils';
 import type { UserProfile } from '@/types';
+import type { TablesUpdate } from '@/types/database.types';
 
 interface SettingsClientProps {
   user: UserProfile;
@@ -25,10 +26,18 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     setSaving(true);
     setError('');
     const supabase = createClient();
+
+    const payload: TablesUpdate<'users'> = {
+      nickname: nickname.trim(),
+      location: location.trim() || null,
+      language,
+    };
+
     const { error: updateError } = await supabase
       .from('users')
-      .update({ nickname: nickname.trim(), location: location.trim() || null, language } as any)
+      .update(payload)
       .eq('id', user.id);
+
     if (updateError) {
       setError(updateError.message);
     } else {
@@ -47,7 +56,9 @@ export default function SettingsClient({ user }: SettingsClientProps) {
     const path = `${user.id}/avatar.${ext}`;
     const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
     if (uploadErr) { setError(uploadErr.message); return; }
-    await supabase.from('users').update({ avatar_url: path } as any).eq('id', user.id);
+
+    const avatarPayload: TablesUpdate<'users'> = { avatar_url: path };
+    await supabase.from('users').update(avatarPayload).eq('id', user.id);
     router.refresh();
   };
 
@@ -77,7 +88,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
 
         {error && <p className="rounded-xl bg-destructive/10 px-4 py-2.5 text-sm text-destructive">{error}</p>}
 
-        {/* Nickname */}
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nickname</label>
           <input
@@ -87,7 +97,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
           />
         </div>
 
-        {/* Location */}
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</label>
           <input
@@ -98,7 +107,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
           />
         </div>
 
-        {/* Language */}
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Language</label>
           <select
@@ -119,7 +127,6 @@ export default function SettingsClient({ user }: SettingsClientProps) {
           {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Changes'}
         </button>
 
-        {/* Account section */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="border-b border-border px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</p>
