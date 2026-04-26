@@ -121,5 +121,13 @@ export async function getSavedListings(userId: string): Promise<Listing[]> {
     .eq('user_id', userId);
 
   if (error) throw error;
-  return (data?.map((d) => d.listing) ?? []) as Listing[];
+
+  type SavedListingRow = {
+    listing: Listing | Listing[] | null;
+  };
+
+  return ((data ?? []) as unknown as SavedListingRow[]).flatMap(({ listing }) => {
+    if (!listing) return [];
+    return Array.isArray(listing) ? listing : [listing];
+  });
 }

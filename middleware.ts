@@ -5,6 +5,12 @@ const PROTECTED_ROUTES = ['/create', '/chat', '/profile', '/settings'];
 const AUTH_ROUTES = ['/login', '/signup'];
 const ADMIN_ROUTES = ['/admin'];
 
+type MiddlewareCookieBatch = {
+  name: string;
+  value: string;
+  options?: Parameters<NextResponse['cookies']['set']>[2];
+}[];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -20,7 +26,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: MiddlewareCookieBatch) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );

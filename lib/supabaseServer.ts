@@ -1,6 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+type ServerCookieBatch = {
+  name: string;
+  value: string;
+  options?: Parameters<ReturnType<typeof cookies>['set']>[2];
+}[];
+
 export async function createServerSupabaseClient() {
   const cookieStore = cookies();
 
@@ -12,7 +18,7 @@ export async function createServerSupabaseClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: ServerCookieBatch) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
@@ -35,7 +41,7 @@ export async function createAdminSupabaseClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: ServerCookieBatch) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
