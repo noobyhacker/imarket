@@ -10,6 +10,8 @@ interface ListingFiltersProps {
   compact?: boolean;
 }
 
+const LANGUAGE_OPTIONS = ['English', 'Korean', 'Russian', 'Chinese', 'Vietnamese'] as const;
+
 export default function ListingFilters({ compact = false }: ListingFiltersProps) {
   const t = useTranslations('listings');
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function ListingFilters({ compact = false }: ListingFiltersProps)
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
 
   const activeFilter = searchParams.get('filter') ?? 'nearby';
+  const activeLanguage = searchParams.get('lang') ?? '';
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -63,6 +66,17 @@ export default function ListingFilters({ compact = false }: ListingFiltersProps)
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none min-w-0"
           />
         </div>
+        <select
+          value={activeLanguage}
+          onChange={(e) => updateParams({ lang: e.target.value || null })}
+          className="hidden rounded-xl bg-secondary px-3 py-2 text-xs font-semibold text-secondary-foreground outline-none lg:block"
+          aria-label="Filter by language"
+        >
+          <option value="">All languages</option>
+          {LANGUAGE_OPTIONS.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
         <div className="hidden items-center gap-1.5 lg:flex">
           {tabs.map((tab) => (
             <button
@@ -111,6 +125,19 @@ export default function ListingFilters({ compact = false }: ListingFiltersProps)
             {tab.label}
           </button>
         ))}
+      </div>
+      <div className="px-4 pb-3">
+        <select
+          value={activeLanguage}
+          onChange={(e) => updateParams({ lang: e.target.value || null })}
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+          aria-label="Filter by language"
+        >
+          <option value="">All languages</option>
+          {LANGUAGE_OPTIONS.map((lang) => (
+            <option key={lang} value={lang}>{lang}</option>
+          ))}
+        </select>
       </div>
     </>
   );

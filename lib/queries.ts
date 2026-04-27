@@ -20,6 +20,7 @@ export async function getListings({
   location,
   sort = 'newest',
   englishFriendly,
+  language,
   page = 0,
   limit = 20,
 }: {
@@ -28,6 +29,7 @@ export async function getListings({
   location?: string;
   sort?: SortOption;
   englishFriendly?: boolean;
+  language?: string;
   page?: number;
   limit?: number;
 }): Promise<Listing[]> {
@@ -35,7 +37,7 @@ export async function getListings({
 
   let query = supabase
     .from('listings')
-    .select('*, seller:users(*)')
+    .select('*')
     .eq('status', 'active')
     .range(page * limit, (page + 1) * limit - 1);
 
@@ -57,6 +59,11 @@ export async function getListings({
     query = query.eq('english_friendly', true);
   }
 
+  if (language) {
+    // languages is a text[] on listings (added via schema migration)
+    query = query.contains('languages', [language]);
+  }
+
   if (sort === 'newest') {
     query = query.order('created_at', { ascending: false });
   } else if (sort === 'price_asc') {
@@ -67,7 +74,12 @@ export async function getListings({
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as Listing[];
+
+  const rows = (data ?? []) as Listing[];
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+  const sellers = await Promise.all(userIds.map((id) => getUserProfile(id).catch(() => null)));
+  const sellerById = new Map(sellers.filter(Boolean).map((u) => [u!.id, u!]));
+  return rows.map((r) => ({ ...r, seller: sellerById.get(r.user_id) })) as Listing[];
 }
 
 export async function getListingById(id: string): Promise<Listing | null> {
@@ -93,13 +105,14 @@ export async function getListingsBySeller(
 
   const { data, error } = await supabase
     .from('listings')
-    .select('*, seller:users(*)')
+    .select('*')
     .eq('user_id', userId)
     .eq('status', status)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []) as Listing[];
+  const seller = await getUserProfile(userId).catch(() => null);
+  return ((data ?? []) as Listing[]).map((l) => ({ ...l, seller: seller ?? undefined })) as Listing[];
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
@@ -119,7 +132,7 @@ export async function getSavedListings(userId: string): Promise<Listing[]> {
 
   const { data, error } = await supabase
     .from('saved_listings')
-    .select('listing:listings(*, seller:users(*))')
+    .select('listing:listings(*)')
     .eq('user_id', userId);
 
   if (error) throw error;

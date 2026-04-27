@@ -5,6 +5,13 @@ const PROTECTED_ROUTES = ['/create', '/chat', '/profile', '/settings'];
 const AUTH_ROUTES = ['/login', '/signup'];
 const ADMIN_ROUTES = ['/admin'];
 
+function parseEmailList(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 type MiddlewareCookieBatch = {
   name: string;
   value: string;
@@ -45,7 +52,16 @@ export async function middleware(request: NextRequest) {
 
   // Admin route protection
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+    const allowList = [
+      ...parseEmailList(process.env.ADMIN_EMAIL),
+      ...parseEmailList(process.env.ADMIN_EMAILS),
+      ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAIL),
+      ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAILS),
+    ];
+    const email = user?.email?.trim().toLowerCase();
+
+    // If no allowlist configured, deny by default.
+    if (!email || allowList.length === 0 || !allowList.includes(email)) {
       return new NextResponse(null, { status: 404 });
     }
   }

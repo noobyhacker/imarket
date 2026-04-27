@@ -29,18 +29,20 @@ export default function ProfileClient({
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-lg items-center justify-between">
+      <div className="mx-auto max-w-lg">
+        <div className="flex items-center justify-between px-4 pt-5">
           <h1 className="text-lg font-bold text-foreground">{t('title')}</h1>
           {isOwnProfile && (
-            <button className="p-1 text-muted-foreground">
+            <button
+              onClick={() => router.push('/settings')}
+              className="rounded-lg p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Open settings"
+            >
               <Settings size={20} />
             </button>
           )}
         </div>
-      </header>
 
-      <div className="mx-auto max-w-lg">
         {/* Profile card */}
         <div className="flex items-center gap-4 px-4 py-5">
           <img

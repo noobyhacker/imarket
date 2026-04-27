@@ -12,6 +12,7 @@ interface HomePageProps {
     location?: string;
     sort?: string;
     filter?: string;
+    lang?: string;
   };
 }
 
@@ -20,6 +21,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const sort = (searchParams.sort as SortOption) || 'newest';
   const englishFriendly = searchParams.filter === 'english';
+  const language = searchParams.lang || undefined;
 
   const [listings, user] = await Promise.all([
     getListings({
@@ -28,6 +30,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       location: searchParams.location,
       sort,
       englishFriendly,
+      language,
     }).catch(() => []),
     getCurrentUser().catch(() => null),
   ]);

@@ -14,6 +14,15 @@ const CATEGORIES: ListingCategory[] = [
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
+type ListingLanguage = 'English' | 'Korean' | 'Russian' | 'Chinese' | 'Vietnamese';
+const LISTING_LANGUAGES: { key: ListingLanguage; label: string }[] = [
+  { key: 'English', label: 'English' },
+  { key: 'Korean', label: 'Korean' },
+  { key: 'Russian', label: 'Russian' },
+  { key: 'Chinese', label: 'Chinese' },
+  { key: 'Vietnamese', label: 'Vietnamese' },
+];
+
 interface CreateListingFormProps {
   userId: string;
 }
@@ -28,10 +37,15 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const [category, setCategory] = useState<ListingCategory | ''>('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [languages, setLanguages] = useState<ListingLanguage[]>(['English', 'Korean']);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const toggleLanguage = (lang: ListingLanguage) => {
+    setLanguages((prev) => (prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]));
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -60,6 +74,10 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const handlePost = async () => {
     if (!title || !price || !category || !location || !description) {
       setError('Please fill in all fields');
+      return;
+    }
+    if (languages.length === 0) {
+      setError('Please select at least one language');
       return;
     }
     if (!userId) {
@@ -119,8 +137,9 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           price: parseInt(price),
           category: category as ListingCategory,
           location,
-          english_friendly: true,
+          english_friendly: languages.includes('English'),
           foreigner_safe: true,
+          languages,
           images: imagePaths,
           status: 'active',
         })
@@ -242,6 +261,30 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
         </div>
 
         <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Languages</label>
+          <div className="flex flex-wrap gap-2">
+            {LISTING_LANGUAGES.map(({ key, label }) => {
+              const active = languages.includes(key);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleLanguage(key)}
+                  className={`rounded-full px-3 py-2 text-xs font-semibold transition-all ${
+                    active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Used for filtering and to show which languages the seller can support for this listing.
+          </p>
+        </div>
+
+        <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('descriptionLabel')}</label>
           <textarea
             value={description}
@@ -254,7 +297,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
 
         <button
           onClick={handlePost}
-          disabled={!title || !price || !category || !location || !description || loading}
+          disabled={!title || !price || !category || !location || !description || languages.length === 0 || loading}
           className="mt-2 w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-all active:scale-[0.98] disabled:opacity-40"
         >
           {loading ? t('posting') : t('postButton')}

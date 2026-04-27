@@ -77,6 +77,7 @@ export type Database = {
           foreigner_safe: boolean
           id: string
           images: string[]
+          languages: string[]
           location: string
           price: number
           status: Database["public"]["Enums"]["listing_status"]
@@ -95,6 +96,7 @@ export type Database = {
           foreigner_safe?: boolean
           id?: string
           images?: string[]
+          languages?: string[]
           location?: string
           price: number
           status?: Database["public"]["Enums"]["listing_status"]
@@ -113,6 +115,7 @@ export type Database = {
           foreigner_safe?: boolean
           id?: string
           images?: string[]
+          languages?: string[]
           location?: string
           price?: number
           status?: Database["public"]["Enums"]["listing_status"]

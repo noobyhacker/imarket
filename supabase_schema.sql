@@ -63,6 +63,7 @@ create table public.listings (
   status                listing_status not null default 'active',
   english_friendly      boolean not null default false,
   foreigner_safe        boolean not null default false,
+  languages             text[] not null default '{}',
   images                text[] not null default '{}',
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
@@ -279,4 +280,5 @@ create policy "Admin can manage store requests"
 --   Bucket name: avatars    (public: true)
 -- Set file size limit: 5MB
 -- Allowed MIME types: image/jpeg, image/png, image/webp
+-- Then run: supabase_storage_policies.sql
 -- ============================================================

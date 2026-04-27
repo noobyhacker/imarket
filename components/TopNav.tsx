@@ -13,6 +13,16 @@ interface TopNavProps {
   user: UserProfile | null;
 }
 
+function isAdminEmail(email: string | null | undefined) {
+  const allowList = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (!email) return false;
+  if (allowList.length === 0) return false;
+  return allowList.includes(email.trim().toLowerCase());
+}
+
 export default function TopNav({ user }: TopNavProps) {
   const t = useTranslations('nav');
   const tTranslation = useTranslations('translation');
@@ -95,7 +105,7 @@ export default function TopNav({ user }: TopNavProps) {
                       <button onClick={() => { router.push('/settings'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                         <Settings size={15} className="text-muted-foreground" /> Settings
                       </button>
-                      {user.is_admin && (
+                      {(user.is_admin || isAdminEmail(user.email)) && (
                         <button onClick={() => { router.push('/admin'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                           <ShieldCheck size={15} className="text-muted-foreground" /> {t('admin')}
                         </button>
