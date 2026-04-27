@@ -137,7 +137,14 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
         return;
       }
 
-      router.push(`/listing/${listing.id}`);
+      if (!listing?.id) {
+        setError('Posted, but could not open the new listing page. Please check your listings from home.');
+        setLoading(false);
+        return;
+      }
+
+      router.push(`/listing/${encodeURIComponent(listing.id)}`);
+      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error: ${msg}`);

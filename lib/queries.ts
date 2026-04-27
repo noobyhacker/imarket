@@ -1,6 +1,19 @@
 import { createServerSupabaseClient } from './supabaseServer';
 import type { Listing, ListingCategory, SortOption, UserProfile } from '@/types';
 
+export async function getUserProfile(id: string): Promise<UserProfile | null> {
+  const supabase = await createServerSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) return null;
+  return data as UserProfile;
+}
+
 export async function getListings({
   search,
   category,
@@ -62,12 +75,14 @@ export async function getListingById(id: string): Promise<Listing | null> {
 
   const { data, error } = await supabase
     .from('listings')
-    .select('*, seller:users(*)')
+    .select('*')
     .eq('id', id)
     .single();
 
   if (error) return null;
-  return data as Listing;
+
+  const seller = data.user_id ? await getUserProfile(data.user_id).catch(() => null) : null;
+  return { ...(data as Listing), seller: seller ?? undefined };
 }
 
 export async function getListingsBySeller(
@@ -85,19 +100,6 @@ export async function getListingsBySeller(
 
   if (error) throw error;
   return (data ?? []) as Listing[];
-}
-
-export async function getUserProfile(id: string): Promise<UserProfile | null> {
-  const supabase = await createServerSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) return null;
-  return data as UserProfile;
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
