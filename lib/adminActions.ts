@@ -3,10 +3,24 @@
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
 
+function parseEmailList(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 async function assertAdmin() {
   const supabase = await createAdminSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.email !== process.env.ADMIN_EMAIL) {
+  const allowList = [
+    ...parseEmailList(process.env.ADMIN_EMAIL),
+    ...parseEmailList(process.env.ADMIN_EMAILS),
+    ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAIL),
+    ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAILS),
+  ];
+  const email = user?.email?.trim().toLowerCase();
+  if (!email || allowList.length === 0 || !allowList.includes(email)) {
     throw new Error('Unauthorized');
   }
 }

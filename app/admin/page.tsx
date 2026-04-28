@@ -1,54 +1,84 @@
 import { getTranslations } from 'next-intl/server';
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
+import TopNav from '@/components/TopNav';
+import { getCurrentUser } from '@/lib/queries';
+import type { Listing, StoreRequest, UserProfile } from '@/types';
 
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { tab?: string; page?: string };
+  searchParams: { tab?: string; page?: string; q?: string };
 }) {
   const t = await getTranslations('admin');
   const supabase = await createAdminSupabaseClient();
+  const currentUser = await getCurrentUser().catch(() => null);
   const tab = searchParams.tab ?? 'listings';
   const page = parseInt(searchParams.page ?? '0');
+  const q = searchParams.q?.trim() ?? '';
   const limit = 20;
 
+  let listingsQuery = supabase
+    .from('listings')
+    .select('*', { count: 'exact' })
+    .neq('status', 'deleted')
+    .order('created_at', { ascending: false });
+  if (q) {
+    listingsQuery = listingsQuery.or(`title_original.ilike.%${q}%,title_translated.ilike.%${q}%,location.ilike.%${q}%`);
+  }
+
+  let storeRequestsQuery = supabase
+    .from('store_requests')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false });
+  if (q) {
+    storeRequestsQuery = storeRequestsQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+  }
+
+  let usersQuery = supabase
+    .from('users')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false });
+  if (q) {
+    usersQuery = usersQuery.or(`nickname.ilike.%${q}%,email.ilike.%${q}%`);
+  }
+
   const [listingsRes, storeRequestsRes, usersRes] = await Promise.all([
-    supabase
-      .from('listings')
-      .select('*, seller:users(*)', { count: 'exact' })
-      .neq('status', 'deleted')
-      .order('created_at', { ascending: false })
-      .range(page * limit, (page + 1) * limit - 1),
-    supabase
-      .from('store_requests')
-      .select('*, user:users(*)', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(page * limit, (page + 1) * limit - 1),
-    supabase
-      .from('users')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(page * limit, (page + 1) * limit - 1),
+    listingsQuery.range(page * limit, (page + 1) * limit - 1),
+    storeRequestsQuery.range(page * limit, (page + 1) * limit - 1),
+    usersQuery.range(page * limit, (page + 1) * limit - 1),
   ]);
+
+  const users = (usersRes.data ?? []) as UserProfile[];
+  const userMap = new Map(users.map((user) => [user.id, user]));
+  const listings = ((listingsRes.data ?? []) as Listing[]).map((listing) => ({
+    ...listing,
+    seller: userMap.get(listing.user_id),
+  }));
+  const storeRequests = ((storeRequestsRes.data ?? []) as StoreRequest[]).map((request) => ({
+    ...request,
+    user: userMap.get(request.user_id),
+  }));
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
+      <TopNav user={currentUser} />
+      <header className="border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-5xl">
           <h1 className="text-lg font-bold text-foreground">{t('title')}</h1>
         </div>
       </header>
       <AdminDashboard
-        listings={listingsRes.data ?? []}
-        storeRequests={storeRequestsRes.data ?? []}
-        users={usersRes.data ?? []}
+        listings={listings}
+        storeRequests={storeRequests}
+        users={users}
         listingsCount={listingsRes.count ?? 0}
         storeRequestsCount={storeRequestsRes.count ?? 0}
         usersCount={usersRes.count ?? 0}
         currentTab={tab}
         currentPage={page}
         pageSize={limit}
+        searchQuery={q}
       />
     </div>
   );

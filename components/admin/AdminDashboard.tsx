@@ -1,5 +1,6 @@
 'use client';
 
+import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -17,6 +18,7 @@ interface AdminDashboardProps {
   currentTab: string;
   currentPage: number;
   pageSize: number;
+  searchQuery: string;
 }
 
 export default function AdminDashboard({
@@ -29,6 +31,7 @@ export default function AdminDashboard({
   currentTab,
   currentPage,
   pageSize,
+  searchQuery,
 }: AdminDashboardProps) {
   const router = useRouter();
   const t = useTranslations('admin');
@@ -36,9 +39,22 @@ export default function AdminDashboard({
   const [listings, setListings] = useState(initialListings);
   const [storeRequests, setStoreRequests] = useState(initialRequests);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [search, setSearch] = useState(searchQuery);
 
-  const setTab = (tab: string) => router.push(`/admin?tab=${tab}&page=0`);
-  const setPage = (page: number) => router.push(`/admin?tab=${currentTab}&page=${page}`);
+  const buildAdminUrl = (params: { tab?: string; page?: number; q?: string }) => {
+    const nextTab = params.tab ?? currentTab;
+    const nextPage = params.page ?? currentPage;
+    const nextQ = params.q ?? searchQuery;
+    const query = new URLSearchParams();
+    query.set('tab', nextTab);
+    query.set('page', String(nextPage));
+    if (nextQ.trim()) query.set('q', nextQ.trim());
+    return `/admin?${query.toString()}`;
+  };
+
+  const setTab = (tab: string) => router.push(buildAdminUrl({ tab, page: 0 }));
+  const setPage = (page: number) => router.push(buildAdminUrl({ page }));
+  const runSearch = () => router.push(buildAdminUrl({ page: 0, q: search }));
 
   const handleDeleteListing = async (id: string) => {
     await adminDeleteListing(id);
@@ -74,7 +90,7 @@ export default function AdminDashboard({
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       {/* Tabs */}
-      <div className="mb-6 flex gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -93,6 +109,27 @@ export default function AdminDashboard({
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="mb-6 flex gap-2">
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5">
+          <Search size={16} className="text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') runSearch();
+            }}
+            placeholder="Search by listing title, request name, user nickname, or email"
+            className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+        <button
+          onClick={runSearch}
+          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+        >
+          Search
+        </button>
       </div>
 
       {/* Listings table */}
@@ -120,6 +157,9 @@ export default function AdminDashboard({
                   <p className="text-xs text-muted-foreground">
                     {formatPrice(listing.price)} · {listing.location} · {formatRelativeTime(listing.created_at)}
                   </p>
+                  {listing.seller && (
+                    <p className="text-xs text-muted-foreground">{listing.seller.nickname} · {listing.seller.email}</p>
+                  )}
                 </div>
                 <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                   listing.status === 'active'
@@ -154,7 +194,9 @@ export default function AdminDashboard({
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-semibold text-foreground">{req.name}</p>
                   <p className="truncate text-xs text-muted-foreground">{req.description}</p>
-                  <p className="text-xs text-muted-foreground">{req.user?.email} · {formatRelativeTime(req.created_at)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {req.user?.nickname ?? 'Unknown user'} · {req.user?.email ?? 'No email'} · {formatRelativeTime(req.created_at)}
+                  </p>
                 </div>
                 <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                   req.status === 'pending'
