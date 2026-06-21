@@ -1,11 +1,12 @@
 'use client';
 
-import { ArrowLeft, Heart, Share2, Star, ShieldCheck, Globe, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, ShieldCheck, Globe, MessageCircle, Pencil, CheckCircle, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
+import { toggleListingStatus, deleteOwnListing } from '@/lib/listingActions';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl, getAvatarUrl } from '@/lib/utils';
 import type { Listing, UserProfile } from '@/types';
 
@@ -29,6 +30,25 @@ export default function ListingDetailClient({
   const [saved, setSaved] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [startingChat, setStartingChat] = useState(false);
+  const [listingStatus, setListingStatus] = useState(listing.status);
+  const [toggling, setToggling] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const isSeller = currentUser?.id === listing.user_id;
+
+  const handleToggleStatus = async () => {
+    setToggling(true);
+    const next = listingStatus === 'active' ? 'sold' : 'active';
+    await toggleListingStatus(listing.id, next);
+    setListingStatus(next);
+    setToggling(false);
+  };
+
+  const handleDelete = async () => {
+    await deleteOwnListing(listing.id);
+    router.push('/');
+    router.refresh();
+  };
 
   const images = listing.images?.length
     ? listing.images.map(getSupabaseImageUrl)
@@ -236,16 +256,70 @@ export default function ListingDetailClient({
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card safe-area-bottom">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <p className="text-xl font-extrabold text-foreground">{formatPrice(listing.price)}</p>
-          <button
-            onClick={handleChat}
-            disabled={startingChat || currentUser?.id === listing.user_id}
-            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-transform active:scale-[0.97] disabled:opacity-40"
-          >
-            <MessageCircle size={16} />
-            {chatLabel}
-          </button>
+
+          {isSeller ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push(`/listing/${listing.id}/edit`)}
+                className="flex items-center gap-1.5 rounded-xl bg-secondary px-4 py-3 text-sm font-bold text-foreground transition-transform active:scale-[0.97]"
+              >
+                <Pencil size={15} /> Edit
+              </button>
+              <button
+                onClick={handleToggleStatus}
+                disabled={toggling}
+                className={`flex items-center gap-1.5 rounded-xl px-4 py-3 text-sm font-bold transition-transform active:scale-[0.97] disabled:opacity-40 ${
+                  listingStatus === 'active'
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                }`}
+              >
+                <CheckCircle size={15} />
+                {listingStatus === 'active' ? 'Mark Sold' : 'Relist'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center justify-center rounded-xl bg-destructive/10 px-3 py-3 text-destructive transition-transform active:scale-[0.97]"
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleChat}
+              disabled={startingChat}
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-transform active:scale-[0.97] disabled:opacity-40"
+            >
+              <MessageCircle size={16} />
+              {chatLabel}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Delete confirm modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-elevated">
+            <p className="text-sm font-bold text-foreground">Delete this listing?</p>
+            <p className="mt-1 text-xs text-muted-foreground">This cannot be undone. Active chats about this item will remain.</p>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

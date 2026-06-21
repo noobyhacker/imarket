@@ -1,6 +1,7 @@
 'use client';
 
 import { Heart, Globe, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -42,12 +43,8 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
   };
 
   return (
-    <button
-      onClick={() => router.push(`/listing/${item.id}`)}
-      className="flex w-full gap-3.5 border-b border-border px-4 py-3.5 text-left transition-colors hover:bg-secondary/50 animate-fade-in"
-    >
-      {/* Thumbnail */}
-      <div className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl">
+    <div className="flex w-full gap-3.5 border-b border-border px-4 py-3.5 transition-colors hover:bg-secondary/50 animate-fade-in">
+      <Link href={`/listing/${item.id}`} className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -64,20 +61,19 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
             <ShieldCheck size={10} /> Safe
           </span>
         )}
-      </div>
+      </Link>
 
-      {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
-        <div>
-          <h3 className="truncate text-[15px] font-semibold leading-tight text-foreground">
-            {item.title_original}
-          </h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {item.location} · {formatRelativeTime(item.created_at)}
-          </p>
-        </div>
+      <div className="flex min-w-0 flex-1 items-stretch gap-2">
+        <Link href={`/listing/${item.id}`} className="flex min-w-0 flex-1 flex-col justify-between py-0.5 text-left">
+          <div>
+            <h3 className="truncate text-[15px] font-semibold leading-tight text-foreground">
+              {item.title_original}
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {item.location} · {formatRelativeTime(item.created_at)}
+            </p>
+          </div>
 
-        <div className="flex items-end justify-between">
           <div>
             <p className="text-lg font-bold text-foreground">{formatPrice(item.price)}</p>
             <div className="mt-1 flex gap-1.5">
@@ -88,20 +84,21 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
               )}
             </div>
           </div>
+        </Link>
 
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="p-1"
-            aria-label={saved ? 'Unsave' : 'Save'}
-          >
-            <Heart
-              size={20}
-              className={saved ? 'fill-primary text-primary' : 'text-muted-foreground'}
-            />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="self-end p-1"
+          aria-label={saved ? 'Unsave' : 'Save'}
+        >
+          <Heart
+            size={20}
+            className={saved ? 'fill-primary text-primary' : 'text-muted-foreground'}
+          />
+        </button>
       </div>
-    </button>
+    </div>
   );
 }

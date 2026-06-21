@@ -6,48 +6,48 @@
 
 @layer base {
   :root {
-    --background: 30 25% 98%;
-    --foreground: 20 10% 12%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 20 10% 12%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 20 10% 12%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 24 85% 55%;
+    --primary: 211 100% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 20% 95%;
-    --secondary-foreground: 20 10% 25%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 30 15% 94%;
-    --muted-foreground: 20 8% 50%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 24 85% 55%;
+    --accent: 211 100% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 15% 90%;
-    --input: 30 15% 90%;
-    --ring: 24 85% 55%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 211 100% 65%;
 
     --radius: 0.875rem;
 
     /* Custom tokens */
-    --karrot-orange: 24 85% 55%;
-    --karrot-orange-light: 28 90% 95%;
+    --karrot-orange: 211 100% 65%;
+    --karrot-orange-light: 211 100% 96%;
     --karrot-green: 152 60% 45%;
     --karrot-green-light: 152 50% 94%;
     --trust-blue: 210 70% 50%;
     --trust-blue-light: 210 60% 95%;
     --safe-badge: 152 60% 45%;
 
-    --shadow-card: 0 1px 3px 0 hsl(20 10% 12% / 0.04), 0 1px 2px -1px hsl(20 10% 12% / 0.04);
-    --shadow-card-hover: 0 4px 12px 0 hsl(20 10% 12% / 0.08), 0 2px 4px -1px hsl(20 10% 12% / 0.04);
-    --shadow-elevated: 0 10px 25px -5px hsl(20 10% 12% / 0.1), 0 8px 10px -6px hsl(20 10% 12% / 0.06);
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 7% / 0.04), 0 1px 2px -1px hsl(0 0% 7% / 0.04);
+    --shadow-card-hover: 0 4px 12px 0 hsl(0 0% 7% / 0.08), 0 2px 4px -1px hsl(0 0% 7% / 0.04);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 7% / 0.1), 0 8px 10px -6px hsl(0 0% 7% / 0.06);
   }
 
   .dark {
@@ -57,19 +57,19 @@
     --card-foreground: 30 20% 95%;
     --popover: 20 10% 12%;
     --popover-foreground: 30 20% 95%;
-    --primary: 24 85% 55%;
+    --primary: 211 100% 65%;
     --primary-foreground: 0 0% 100%;
     --secondary: 20 10% 16%;
     --secondary-foreground: 30 20% 90%;
     --muted: 20 10% 18%;
     --muted-foreground: 30 10% 60%;
-    --accent: 24 85% 55%;
+    --accent: 211 100% 65%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
     --border: 20 10% 20%;
     --input: 20 10% 20%;
-    --ring: 24 85% 55%;
+    --ring: 211 100% 65%;
   }
 }
 

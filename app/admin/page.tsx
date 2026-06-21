@@ -3,7 +3,7 @@ import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import TopNav from '@/components/TopNav';
 import { getCurrentUser } from '@/lib/queries';
-import type { Listing, StoreRequest, UserProfile } from '@/types';
+import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
 export default async function AdminPage({
   searchParams,
@@ -43,10 +43,19 @@ export default async function AdminPage({
     usersQuery = usersQuery.or(`nickname.ilike.%${q}%,email.ilike.%${q}%`);
   }
 
-  const [listingsRes, storeRequestsRes, usersRes] = await Promise.all([
+  let chatsQuery = supabase
+    .from('conversations')
+    .select(`*, listing:listings(id,title_original,images,price), buyer:users!conversations_buyer_id_fkey(*), seller:users!conversations_seller_id_fkey(*)`, { count: 'exact' })
+    .order('last_message_at', { ascending: false });
+  if (q && tab === 'chats') {
+    chatsQuery = chatsQuery.or(`last_message.ilike.%${q}%`);
+  }
+
+  const [listingsRes, storeRequestsRes, usersRes, chatsRes] = await Promise.all([
     listingsQuery.range(page * limit, (page + 1) * limit - 1),
     storeRequestsQuery.range(page * limit, (page + 1) * limit - 1),
     usersQuery.range(page * limit, (page + 1) * limit - 1),
+    tab === 'chats' ? chatsQuery.range(page * limit, (page + 1) * limit - 1) : Promise.resolve({ data: [], count: 0, error: null }),
   ]);
 
   const users = (usersRes.data ?? []) as UserProfile[];
@@ -59,6 +68,7 @@ export default async function AdminPage({
     ...request,
     user: userMap.get(request.user_id),
   }));
+  const conversations = (chatsRes.data ?? []) as unknown as Conversation[];
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,9 +82,11 @@ export default async function AdminPage({
         listings={listings}
         storeRequests={storeRequests}
         users={users}
+        conversations={conversations}
         listingsCount={listingsRes.count ?? 0}
         storeRequestsCount={storeRequestsRes.count ?? 0}
         usersCount={usersRes.count ?? 0}
+        chatsCount={chatsRes.count ?? 0}
         currentTab={tab}
         currentPage={page}
         pageSize={limit}

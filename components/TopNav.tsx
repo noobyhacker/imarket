@@ -1,7 +1,7 @@
 'use client';
 
-import { MapPin, Languages, Settings, ShieldCheck, LogOut, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { MapPin, Languages, Settings, ShieldCheck, LogOut, User, MessageCircle } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabaseClient';
@@ -27,8 +27,11 @@ export default function TopNav({ user }: TopNavProps) {
   const t = useTranslations('nav');
   const tTranslation = useTranslations('translation');
   const router = useRouter();
+  const pathname = usePathname();
   const [translateEnabled, setTranslateEnabled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [location, setLocation] = useState<string>('');
+  const [totalUnread, setTotalUnread] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -42,6 +45,51 @@ export default function TopNav({ user }: TopNavProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // Fetch + subscribe to total unread count across all conversations
+  useEffect(() => {
+    if (!user) return;
+    const client = createClient();
+
+    const fetchUnread = async () => {
+      const { data } = await client
+        .from('conversations')
+        .select('buyer_id, buyer_unread, seller_unread')
+        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+      if (!data) return;
+      const total = data.reduce((sum, c) => {
+        return sum + (c.buyer_id === user.id ? (c.buyer_unread ?? 0) : (c.seller_unread ?? 0));
+      }, 0);
+      setTotalUnread(total);
+    };
+
+    fetchUnread();
+
+    const channel = client
+      .channel('topnav-unread')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, fetchUnread)
+      .subscribe();
+
+    return () => { client.removeChannel(channel); };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';
+        const country = data.address?.country || '';
+        setLocation([city, country].filter(Boolean).join(', '));
+      } catch {
+        setLocation('');
+      }
+    });
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
@@ -53,19 +101,38 @@ export default function TopNav({ user }: TopNavProps) {
     <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4 py-3">
-          <button onClick={() => router.push('/')} className="flex-shrink-0 text-xl font-extrabold tracking-tight text-foreground">
-            i<span className="text-primary">Market</span>
+          <button onClick={() => router.push('/')} className="flex-shrink-0">
+            <img src="/logo.svg" alt="iMarket" className="h-10 w-auto" />
           </button>
 
-          <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
-            <MapPin size={11} /> Seoul, South Korea
-          </span>
+          {location && (
+            <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
+              <MapPin size={11} /> {location}
+            </span>
+          )}
 
           <div className="flex-1">
             <ListingFilters translateEnabled={translateEnabled} compact />
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-2">
+            {user && (
+              <button
+                onClick={() => router.push('/chat')}
+                className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                  pathname === '/chat' || pathname.startsWith('/chat/')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-secondary text-foreground'
+                }`}
+              >
+                <MessageCircle size={18} />
+                {totalUnread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-w-[16px] h-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+                    {totalUnread > 99 ? '99+' : totalUnread}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               onClick={() => setTranslateEnabled(!translateEnabled)}
               className={`hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:flex ${

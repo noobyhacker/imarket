@@ -56,6 +56,7 @@ export default function ListingFeed({
 
 // Grid card for desktop
 import { Heart, Globe, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -82,17 +83,21 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
   };
 
   return (
-    <button
-      onClick={() => router.push(`/listing/${item.id}`)}
-      className="group overflow-hidden rounded-2xl border border-border bg-card text-left shadow-card transition-all duration-200 hover:scale-[1.02] hover:shadow-card-hover animate-fade-in"
-    >
+    <div className="group overflow-hidden rounded-2xl border border-border bg-card text-left shadow-card transition-all duration-200 hover:scale-[1.02] hover:shadow-card-hover animate-fade-in">
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-        {imageUrl ? (
-          <Image src={imageUrl} alt={item.title_original} fill className="object-cover transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw" />
-        ) : (
-          <div className="h-full w-full bg-muted" />
-        )}
-        <button onClick={handleSave} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm">
+        <Link href={`/listing/${item.id}`} className="block h-full w-full">
+          {imageUrl ? (
+            <Image src={imageUrl} alt={item.title_original} fill className="object-cover transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw" />
+          ) : (
+            <div className="h-full w-full bg-muted" />
+          )}
+        </Link>
+        <button
+          type="button"
+          onClick={handleSave}
+          aria-label={saved ? 'Unsave' : 'Save'}
+          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm"
+        >
           <Heart size={15} className={saved ? 'fill-primary text-primary' : 'text-foreground'} />
         </button>
         {item.foreigner_safe && (
@@ -101,7 +106,7 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
           </span>
         )}
       </div>
-      <div className="p-3">
+      <Link href={`/listing/${item.id}`} className="block p-3">
         <p className="truncate text-sm font-semibold text-foreground">{item.title_original}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{item.location} · {formatRelativeTime(item.created_at)}</p>
         <div className="mt-2 flex items-center justify-between">
@@ -112,7 +117,7 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
             </span>
           )}
         </div>
-      </div>
-    </button>
+      </Link>
+    </div>
   );
 }

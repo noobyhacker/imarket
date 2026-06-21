@@ -1,20 +1,22 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { adminDeleteListing, adminApproveStoreRequest, adminRejectStoreRequest } from '@/lib/adminActions';
-import { formatPrice, formatRelativeTime, getSupabaseImageUrl } from '@/lib/utils';
-import type { Listing, StoreRequest, UserProfile } from '@/types';
+import { formatPrice, formatRelativeTime, getSupabaseImageUrl, getAvatarUrl } from '@/lib/utils';
+import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
 interface AdminDashboardProps {
   listings: Listing[];
   storeRequests: StoreRequest[];
   users: UserProfile[];
+  conversations: Conversation[];
   listingsCount: number;
   storeRequestsCount: number;
   usersCount: number;
+  chatsCount: number;
   currentTab: string;
   currentPage: number;
   pageSize: number;
@@ -25,9 +27,11 @@ export default function AdminDashboard({
   listings: initialListings,
   storeRequests: initialRequests,
   users,
+  conversations,
   listingsCount,
   storeRequestsCount,
   usersCount,
+  chatsCount,
   currentTab,
   currentPage,
   pageSize,
@@ -77,6 +81,7 @@ export default function AdminDashboard({
     { key: 'listings', label: t('listings'), count: listingsCount },
     { key: 'store_requests', label: t('storeRequests'), count: storeRequestsCount },
     { key: 'users', label: t('users'), count: usersCount },
+    { key: 'chats', label: 'Chats', count: chatsCount },
   ];
 
   const totalPages = Math.ceil(
@@ -84,6 +89,8 @@ export default function AdminDashboard({
       ? listingsCount / pageSize
       : currentTab === 'store_requests'
       ? storeRequestsCount / pageSize
+      : currentTab === 'chats'
+      ? chatsCount / pageSize
       : usersCount / pageSize
   );
 
@@ -252,6 +259,54 @@ export default function AdminDashboard({
                 <p className="text-xs text-muted-foreground">{formatRelativeTime(user.created_at)}</p>
               </div>
             ))
+          )}
+        </div>
+      )}
+
+      {/* Chats table */}
+      {currentTab === 'chats' && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          {conversations.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">{t('noData')}</p>
+          ) : (
+            conversations.map((conv) => {
+              const listingImage = conv.listing?.images?.[0]
+                ? getSupabaseImageUrl(conv.listing.images[0])
+                : null;
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => router.push(`/admin/chat/${conv.id}`)}
+                  className="flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left last:border-0 transition-colors hover:bg-secondary/50"
+                >
+                  {/* Avatars */}
+                  <div className="relative flex-shrink-0">
+                    <img src={getAvatarUrl(conv.buyer?.avatar_url ?? null)} alt="" className="h-9 w-9 rounded-full border-2 border-card" />
+                    <img src={getAvatarUrl(conv.seller?.avatar_url ?? null)} alt="" className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-card" />
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground">
+                      {conv.buyer?.nickname} → {conv.seller?.nickname}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {conv.listing?.title_original} · {formatPrice(conv.listing?.price ?? 0)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground/70">{conv.last_message}</p>
+                  </div>
+                  {/* Listing thumbnail + time */}
+                  <div className="flex flex-shrink-0 flex-col items-end gap-1">
+                    {listingImage && (
+                      <img src={listingImage} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    )}
+                    <span className="text-[10px] text-muted-foreground">
+                      {conv.last_message_at ? formatRelativeTime(conv.last_message_at) : ''}
+                    </span>
+                  </div>
+                  <MessageSquare size={14} className="flex-shrink-0 text-muted-foreground" />
+                </button>
+              );
+            })
           )}
         </div>
       )}

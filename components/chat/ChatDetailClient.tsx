@@ -35,6 +35,13 @@ export default function ChatDetailClient({
     ? getSupabaseImageUrl(conversation.listing.images[0])
     : null;
 
+  // Mark conversation as read on mount
+  useEffect(() => {
+    const supabase = createClient();
+    const field = isBuyer ? 'buyer_unread' : 'seller_unread';
+    supabase.from('conversations').update({ [field]: 0 }).eq('id', conversation.id).then(() => {});
+  }, [conversation.id, isBuyer]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
@@ -96,10 +103,21 @@ export default function ChatDetailClient({
         prev.map((m) => (m.id === tempId ? { ...inserted, sender: currentUser } : m))
       );
 
-      // Update conversation last_message
+      // Update last_message + increment recipient's unread count
+      const unreadField = isBuyer ? 'seller_unread' : 'buyer_unread';
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select(unreadField)
+        .eq('id', conversation.id)
+        .single();
+      const currentUnread = (conv as Record<string, number> | null)?.[unreadField] ?? 0;
       await supabase
         .from('conversations')
-        .update({ last_message: text, last_message_at: new Date().toISOString() })
+        .update({
+          last_message: text,
+          last_message_at: new Date().toISOString(),
+          [unreadField]: currentUnread + 1,
+        })
         .eq('id', conversation.id);
     }
 
@@ -136,9 +154,12 @@ export default function ChatDetailClient({
           </button>
         </div>
 
-        {/* Item banner */}
+        {/* Item banner — tapping navigates to the listing */}
         {conversation.listing && (
-          <div className="mx-auto flex max-w-lg items-center gap-3 border-t border-border bg-secondary/50 px-4 py-2">
+          <button
+            onClick={() => router.push(`/listing/${conversation.listing!.id}`)}
+            className="mx-auto flex w-full max-w-lg items-center gap-3 border-t border-border bg-secondary/50 px-4 py-2 text-left transition-colors hover:bg-secondary"
+          >
             {listingImage && (
               <img src={listingImage} alt="" className="h-9 w-9 rounded-lg object-cover" />
             )}
@@ -150,7 +171,8 @@ export default function ChatDetailClient({
                 {formatPrice(conversation.listing.price)}
               </p>
             </div>
-          </div>
+            <span className="text-[10px] text-muted-foreground">View →</span>
+          </button>
         )}
       </header>
 
