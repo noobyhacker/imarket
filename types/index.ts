@@ -13,6 +13,7 @@ export type AuctionStatus = 'scheduled' | 'live' | 'ended' | 'cancelled';
 
 export type Listing        = T<'listings'>  & {
   seller?: UserProfile;
+  store?: Store;
   // Phase 2
   origin_country_code?: string | null;
   // Phase 3 — auctions
@@ -52,8 +53,24 @@ export type Conversation   = T<'conversations'> & {
   seller?: UserProfile;
 };
 export type Message        = T<'messages'>  & { sender?: UserProfile };
-export type Store          = T<'stores'>    & { owner?: UserProfile };
-export type StoreRequest   = T<'store_requests'> & { user?: UserProfile };
+// Phase 4 store fields augmented (not yet in generated types).
+export type Store          = T<'stores'>    & {
+  owner?: UserProfile;
+  business_name?: string | null;
+  business_reg_number?: string | null;
+  category?: string | null;
+  verified?: boolean;
+  listingCount?: number;
+};
+export type StoreRequest   = T<'store_requests'> & {
+  user?: UserProfile;
+  business_name?: string | null;
+  business_reg_number?: string | null;
+  category?: string | null;
+  contact?: string | null;
+  document_url?: string | null;
+  review_reason?: string | null;
+};
 
 // ── Insert helpers ─────────────────────────────────────────
 import type { TablesInsert as TI } from './database.types';

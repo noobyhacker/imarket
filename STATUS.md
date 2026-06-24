@@ -54,9 +54,17 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 > **⚠ Vercel cron cadence:** `vercel.json` uses `* * * * *` (every minute) — requires Vercel **Pro**. On Hobby, change to a daily schedule; lazy close-on-read still gives correct live UX.
 > **New env var:** `CRON_SECRET` (set in Vercel + `.env.local`).
 
-## Phase 4 — Store owners
+## Phase 4 — Store owners (DONE)
 
-_Pending._
+- **Migration:** `supabase/migrations/0003_stores.sql` — business fields on `store_requests` (business_name, business_reg_number, category, contact, document_url, review_reason) + `stores` (business_name, business_reg_number, category, verified); public read of active stores; **private** `store-docs` bucket + owner upload/read policies (admin reads via service role). **⚠ Run in Supabase SQL editor for `izwshmdscanpidkxrniu`.**
+- **Validation:** `lib/businessNumber.ts` — 사업자등록번호 format + checksum (no external lookup).
+- **Apply:** `/stores/apply` + `StoreApplyClient` (cert upload to private bucket, live checksum validation, pending/rejected/owner states, re-apply with reason). `lib/storeActions.ts#submitStoreApplication` (server-validated).
+- **Directory:** `/stores` (searchable, listing counts, verified badge) + `/stores/[id]` (profile + listings). Queries `getStores/getStoreById/getStoreListings/getStoreByOwner/getStoreRequestByUser`.
+- **Admin review:** AdminDashboard store_requests tab shows all submitted fields side-by-side + **View certificate** (admin signed URL via `adminGetStoreDocUrl`); **Approve** (creates verified store + notifies) / **Reject with required reason** (modal + notifies). No auto-approval.
+- **Listing-as-store:** "Publish as [business name]" toggle in Create + Edit forms (sets `listings.store_id`); verified badge banner on listing detail (`getListingById` enriches `store`).
+- **Discovery:** Stores in TopNav dropdown; "Open a Store" on own profile.
+
+> **Manual verification only** (per spec): NTS 사업자등록번호 lookup API intentionally NOT integrated — future enhancement. A human reviews the certificate against the submitted name + number.
 
 ## Flagged items / deferred
 

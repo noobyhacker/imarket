@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from './supabaseServer';
-import type { Bid, Listing, ListingCategory, SortOption, UserProfile } from '@/types';
+import type { Bid, Listing, ListingCategory, SortOption, Store, StoreRequest, UserProfile } from '@/types';
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
   const supabase = await createServerSupabaseClient();
@@ -103,8 +103,10 @@ export async function getListingById(id: string): Promise<Listing | null> {
 
   if (error) return null;
 
-  const seller = data.user_id ? await getUserProfile(data.user_id).catch(() => null) : null;
-  return { ...(data as Listing), seller: seller ?? undefined };
+  const listing = data as Listing;
+  const seller = listing.user_id ? await getUserProfile(listing.user_id).catch(() => null) : null;
+  const store = listing.store_id ? await getStoreById(listing.store_id).catch(() => null) : null;
+  return { ...listing, seller: seller ?? undefined, store: store ?? undefined };
 }
 
 export async function getAuctions({
@@ -174,6 +176,79 @@ export async function getListingsBySeller(
   if (error) throw error;
   const seller = await getUserProfile(userId).catch(() => null);
   return ((data ?? []) as Listing[]).map((l) => ({ ...l, seller: seller ?? undefined })) as Listing[];
+}
+
+// ── Stores ──────────────────────────────────────────────────
+
+export async function getStores(search?: string): Promise<Store[]> {
+  const supabase = await createServerSupabaseClient();
+
+  let query = supabase
+    .from('stores')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,business_name.ilike.%${search}%,category.ilike.%${search}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) return [];
+  const stores = (data ?? []) as Store[];
+
+  // Listing count per store
+  const withCounts = await Promise.all(
+    stores.map(async (s) => {
+      const { count } = await supabase
+        .from('listings')
+        .select('id', { count: 'exact', head: true })
+        .eq('store_id', s.id)
+        .eq('status', 'active');
+      return { ...s, listingCount: count ?? 0 };
+    })
+  );
+  return withCounts;
+}
+
+export async function getStoreById(id: string): Promise<Store | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase.from('stores').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  const owner = await getUserProfile((data as Store).owner_id).catch(() => null);
+  return { ...(data as Store), owner: owner ?? undefined };
+}
+
+export async function getStoreListings(storeId: string): Promise<Listing[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('store_id', storeId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  if (error) return [];
+  return (data ?? []) as Listing[];
+}
+
+/** The current user's store (if they are an approved store owner). */
+export async function getStoreByOwner(userId: string): Promise<Store | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase.from('stores').select('*').eq('owner_id', userId).maybeSingle();
+  return (data as Store) ?? null;
+}
+
+/** The user's latest store application (to show pending/rejected state). */
+export async function getStoreRequestByUser(userId: string): Promise<StoreRequest | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('store_requests')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as StoreRequest) ?? null;
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import CountrySelect from '@/components/listing/CountrySelect';
-import type { ListingCategory } from '@/types';
+import type { ListingCategory, Store } from '@/types';
 
 const CATEGORIES: ListingCategory[] = [
   'electronics', 'furniture', 'clothing', 'vehicles',
@@ -26,9 +26,10 @@ const LISTING_LANGUAGES: { key: ListingLanguage; label: string }[] = [
 
 interface CreateListingFormProps {
   userId: string;
+  store?: Store | null;
 }
 
-export default function CreateListingForm({ userId }: CreateListingFormProps) {
+export default function CreateListingForm({ userId, store }: CreateListingFormProps) {
   const router = useRouter();
   const t = useTranslations('create');
   const tCategories = useTranslations('categories');
@@ -44,6 +45,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [originCountry, setOriginCountry] = useState<string | null>(null);
+  const [publishAsStore, setPublishAsStore] = useState<boolean>(!!store);
   const [languages, setLanguages] = useState<ListingLanguage[]>(['English', 'Korean']);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -166,6 +168,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           foreigner_safe: true,
           languages,
           origin_country_code: originCountry,
+          store_id: store && publishAsStore ? store.id : null,
           images: imagePaths,
           status: 'active',
           sale_type: saleType,
@@ -333,6 +336,22 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
           />
         </div>
+
+        {store && (
+          <button
+            type="button"
+            onClick={() => setPublishAsStore((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-foreground">Publish as {store.business_name || store.name}</p>
+              <p className="text-xs text-muted-foreground">Show your verified business name on this listing</p>
+            </div>
+            <span className={`relative h-6 w-10 flex-shrink-0 rounded-full transition-colors ${publishAsStore ? 'bg-primary' : 'bg-muted'}`}>
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${publishAsStore ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+            </span>
+          </button>
+        )}
 
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country of Origin</label>

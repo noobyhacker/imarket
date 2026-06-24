@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Heart, Share2, Star, ShieldCheck, Globe, MessageCircle, Pencil, CheckCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, ShieldCheck, Globe, MessageCircle, Pencil, CheckCircle, Trash2, BadgeCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -222,6 +222,20 @@ export default function ListingDetailClient({
             <div className="flex items-center gap-1 rounded-full bg-karrot-light px-2.5 py-1">
               <Star size={12} className="fill-primary text-primary" />
               <span className="text-xs font-bold text-foreground">{seller.trust_score?.toFixed(1)}</span>
+            </div>
+          </button>
+        )}
+
+        {/* Verified store banner */}
+        {listing.store?.verified && (
+          <button
+            onClick={() => router.push(`/stores/${listing.store!.id}`)}
+            className="flex w-full items-center gap-2 border-b border-border bg-primary/5 px-4 py-3 text-left"
+          >
+            <BadgeCheck size={18} className="flex-shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-foreground">{listing.store.business_name || listing.store.name}</p>
+              <p className="text-xs text-muted-foreground">Verified business · View store</p>
             </div>
           </button>
         )}

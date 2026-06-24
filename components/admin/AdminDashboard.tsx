@@ -1,10 +1,11 @@
 'use client';
 
-import { Search, MessageSquare } from 'lucide-react';
+import { Search, MessageSquare, FileText, BadgeCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { adminDeleteListing, adminApproveStoreRequest, adminRejectStoreRequest } from '@/lib/adminActions';
+import { adminDeleteListing, adminApproveStoreRequest, adminRejectStoreRequest, adminGetStoreDocUrl } from '@/lib/adminActions';
+import { formatBusinessNumber } from '@/lib/businessNumber';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl, getAvatarUrl } from '@/lib/utils';
 import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
@@ -44,6 +45,10 @@ export default function AdminDashboard({
   const [storeRequests, setStoreRequests] = useState(initialRequests);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [search, setSearch] = useState(searchQuery);
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
+  const [docLoading, setDocLoading] = useState<string | null>(null);
 
   const buildAdminUrl = (params: { tab?: string; page?: number; q?: string }) => {
     const nextTab = params.tab ?? currentTab;
@@ -66,15 +71,34 @@ export default function AdminDashboard({
     setConfirmDelete(null);
   };
 
-  const handleStoreRequest = async (id: string, action: 'approved' | 'rejected') => {
-    if (action === 'approved') {
-      await adminApproveStoreRequest(id);
-    } else {
-      await adminRejectStoreRequest(id);
+  const handleApprove = async (id: string) => {
+    await adminApproveStoreRequest(id);
+    setStoreRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)));
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    setRejecting(true);
+    try {
+      await adminRejectStoreRequest(rejectTarget, rejectReason.trim());
+      setStoreRequests((prev) =>
+        prev.map((r) => (r.id === rejectTarget ? { ...r, status: 'rejected', review_reason: rejectReason.trim() } : r))
+      );
+      setRejectTarget(null);
+      setRejectReason('');
+    } finally {
+      setRejecting(false);
     }
-    setStoreRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: action } : r))
-    );
+  };
+
+  const handleViewDoc = async (path: string) => {
+    setDocLoading(path);
+    try {
+      const url = await adminGetStoreDocUrl(path);
+      if (url) window.open(url, '_blank', 'noopener');
+    } finally {
+      setDocLoading(null);
+    }
   };
 
   const tabs = [
@@ -194,42 +218,65 @@ export default function AdminDashboard({
             <p className="py-12 text-center text-sm text-muted-foreground">{t('noData')}</p>
           ) : (
             storeRequests.map((req) => (
-              <div
-                key={req.id}
-                className="flex items-center gap-4 border-b border-border px-4 py-3 last:border-0"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground">{req.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">{req.description}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {req.user?.nickname ?? 'Unknown user'} · {req.user?.email ?? 'No email'} · {formatRelativeTime(req.created_at)}
-                  </p>
-                </div>
-                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                  req.status === 'pending'
-                    ? 'bg-karrot-light text-primary'
-                    : req.status === 'approved'
-                    ? 'bg-safe-light text-safe'
-                    : 'bg-destructive/10 text-destructive'
-                }`}>
-                  {t(req.status as 'pending' | 'approved' | 'rejected')}
-                </span>
-                {req.status === 'pending' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleStoreRequest(req.id, 'approved')}
-                      className="rounded-lg bg-safe/10 px-3 py-1.5 text-xs font-semibold text-safe transition-colors hover:bg-safe/20"
-                    >
-                      {t('approve')}
-                    </button>
-                    <button
-                      onClick={() => handleStoreRequest(req.id, 'rejected')}
-                      className="rounded-lg bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
-                    >
-                      {t('reject')}
-                    </button>
+              <div key={req.id} className="border-b border-border px-4 py-3 last:border-0">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-sm font-semibold text-foreground">{req.business_name || req.name}</p>
+                      {req.status === 'approved' && <BadgeCheck size={14} className="text-primary" />}
+                    </div>
+                    {/* Side-by-side submitted fields */}
+                    <div className="mt-1 grid grid-cols-1 gap-x-4 gap-y-0.5 text-xs text-muted-foreground sm:grid-cols-2">
+                      {req.business_reg_number && <p>사업자등록번호: <span className="text-foreground">{formatBusinessNumber(req.business_reg_number)}</span></p>}
+                      {req.category && <p>Category: <span className="text-foreground">{req.category}</span></p>}
+                      {req.contact && <p>Contact: <span className="text-foreground">{req.contact}</span></p>}
+                      <p>Applicant: <span className="text-foreground">{req.user?.nickname ?? 'Unknown'} · {req.user?.email ?? '—'}</span></p>
+                    </div>
+                    {req.description && <p className="mt-1 truncate text-xs text-muted-foreground">{req.description}</p>}
+                    {req.status === 'rejected' && req.review_reason && (
+                      <p className="mt-1 text-xs text-destructive">Reason: {req.review_reason}</p>
+                    )}
+                    <div className="mt-2 flex items-center gap-3">
+                      <span className="text-[11px] text-muted-foreground">{formatRelativeTime(req.created_at)}</span>
+                      {req.document_url && (
+                        <button
+                          onClick={() => handleViewDoc(req.document_url!)}
+                          disabled={docLoading === req.document_url}
+                          className="flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground hover:bg-muted disabled:opacity-50"
+                        >
+                          <FileText size={12} /> {docLoading === req.document_url ? 'Opening…' : 'View certificate'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      req.status === 'pending'
+                        ? 'bg-karrot-light text-primary'
+                        : req.status === 'approved'
+                        ? 'bg-safe-light text-safe'
+                        : 'bg-destructive/10 text-destructive'
+                    }`}>
+                      {t(req.status as 'pending' | 'approved' | 'rejected')}
+                    </span>
+                    {req.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(req.id)}
+                          className="rounded-lg bg-safe/10 px-3 py-1.5 text-xs font-semibold text-safe transition-colors hover:bg-safe/20"
+                        >
+                          {t('approve')}
+                        </button>
+                        <button
+                          onClick={() => { setRejectTarget(req.id); setRejectReason(''); }}
+                          className="rounded-lg bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
+                        >
+                          {t('reject')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             ))
           )}
@@ -331,6 +378,38 @@ export default function AdminDashboard({
           >
             →
           </button>
+        </div>
+      )}
+
+      {/* Reject-with-reason modal */}
+      {rejectTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-elevated">
+            <p className="text-sm font-bold text-foreground">Reject store application</p>
+            <p className="mt-1 text-xs text-muted-foreground">A reason is required and shown to the applicant.</p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              placeholder="e.g. Certificate does not match the submitted business name."
+              className="mt-3 w-full resize-none rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+            />
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => { setRejectTarget(null); setRejectReason(''); }}
+                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground"
+              >
+                {t('cancelButton')}
+              </button>
+              <button
+                onClick={handleReject}
+                disabled={!rejectReason.trim() || rejecting}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-40"
+              >
+                {rejecting ? '…' : t('reject')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

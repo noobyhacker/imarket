@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Star, Package, ChevronRight } from 'lucide-react';
+import { Settings, Star, ChevronRight, Store as StoreIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -89,6 +89,21 @@ export default function ProfileClient({
             <p className="text-[11px] text-muted-foreground">{t('trustScore')}</p>
           </div>
         </div>
+
+        {/* Store entry (own profile) */}
+        {isOwnProfile && (
+          <button
+            onClick={() => router.push('/stores/apply')}
+            className="mx-4 mt-4 flex w-[calc(100%-2rem)] items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-card transition-all hover:shadow-card-hover"
+          >
+            <StoreIcon size={20} className="text-primary" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">{t('myStore')}</p>
+              <p className="text-xs text-muted-foreground">{t('requestStore')}</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </button>
+        )}
 
         {/* Tab switcher */}
         <div className="mx-4 mt-5 flex gap-2">

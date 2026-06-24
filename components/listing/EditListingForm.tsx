@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabaseClient';
 import { updateListing } from '@/lib/listingActions';
 import { getSupabaseImageUrl } from '@/lib/utils';
 import CountrySelect from '@/components/listing/CountrySelect';
-import type { Listing, ListingCategory } from '@/types';
+import type { Listing, ListingCategory, Store } from '@/types';
 
 const CATEGORIES: ListingCategory[] = [
   'electronics', 'furniture', 'clothing', 'vehicles',
@@ -28,9 +28,10 @@ const LISTING_LANGUAGES: { key: ListingLanguage; label: string }[] = [
 
 interface EditListingFormProps {
   listing: Listing;
+  store?: Store | null;
 }
 
-export default function EditListingForm({ listing }: EditListingFormProps) {
+export default function EditListingForm({ listing, store }: EditListingFormProps) {
   const router = useRouter();
   const tCategories = useTranslations('categories');
 
@@ -42,6 +43,7 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
   const [originCountry, setOriginCountry] = useState<string | null>(
     (listing as Listing & { origin_country_code?: string | null }).origin_country_code ?? null
   );
+  const [publishAsStore, setPublishAsStore] = useState<boolean>(!!listing.store_id);
   const [languages, setLanguages] = useState<ListingLanguage[]>(
     (listing.languages ?? []) as ListingLanguage[]
   );
@@ -119,6 +121,7 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
         location,
         languages,
         origin_country_code: originCountry,
+        ...(store ? { store_id: publishAsStore ? store.id : null } : {}),
       });
 
       router.push(`/listing/${listing.id}`);
@@ -188,6 +191,22 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</label>
           <input value={location} onChange={(e) => setLocation(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary" />
         </div>
+
+        {store && (
+          <button
+            type="button"
+            onClick={() => setPublishAsStore((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-foreground">Publish as {store.business_name || store.name}</p>
+              <p className="text-xs text-muted-foreground">Show your verified business name on this listing</p>
+            </div>
+            <span className={`relative h-6 w-10 flex-shrink-0 rounded-full transition-colors ${publishAsStore ? 'bg-primary' : 'bg-muted'}`}>
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${publishAsStore ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+            </span>
+          </button>
+        )}
 
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country of Origin</label>

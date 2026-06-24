@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Languages, Settings, ShieldCheck, LogOut, User, MessageCircle, Gavel } from 'lucide-react';
+import { MapPin, Languages, Settings, ShieldCheck, LogOut, User, MessageCircle, Gavel, Store } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useRef, useEffect } from 'react';
@@ -181,6 +181,9 @@ export default function TopNav({ user }: TopNavProps) {
                     <div className="py-1">
                       <button onClick={() => { router.push(`/profile/${user.id}`); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                         <User size={15} className="text-muted-foreground" /> {t('profile')}
+                      </button>
+                      <button onClick={() => { router.push('/stores'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
+                        <Store size={15} className="text-muted-foreground" /> Stores
                       </button>
                       <button onClick={() => { router.push('/settings'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                         <Settings size={15} className="text-muted-foreground" /> Settings
