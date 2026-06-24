@@ -181,6 +181,36 @@
       "save": "저장",
       "cancel": "취소"
     },
+    "moderation": {
+      "title": "신고 관리",
+      "tabReports": "신고",
+      "tabListings": "상품",
+      "allStatuses": "모든 상태",
+      "allReasons": "모든 사유",
+      "allTargets": "모든 대상",
+      "empty": "조건에 맞는 신고가 없습니다.",
+      "noListings": "상품이 없습니다.",
+      "countLabel": "총 {count}건",
+      "prev": "이전",
+      "next": "다음",
+      "claim": "담당",
+      "removeListing": "상품 삭제",
+      "resolve": "처리",
+      "resolveTitle": "신고 처리",
+      "resolutionPlaceholder": "처리 메모 (필수)…",
+      "cancel": "취소",
+      "confirm": "확인",
+      "apply": "적용",
+      "searchListings": "상품 검색…",
+      "bulkRemove": "선택 {count}개 삭제",
+      "bulkRemoveTitle": "상품 {count}개 삭제",
+      "reasonPlaceholder": "사유 (필수)…",
+      "byReporter": "신고자: {name}",
+      "assignedTo": "담당: {name}",
+      "status": { "open": "접수", "in_review": "검토중", "actioned": "조치완료", "dismissed": "기각" },
+      "reasons": { "spam": "스팸", "scam": "사기", "prohibited": "금지 품목", "counterfeit": "위조품", "harassment": "괴롭힘", "wrong_category": "잘못된 분류", "other": "기타" },
+      "targets": { "listing": "상품", "user": "사용자", "message": "메시지", "conversation": "대화" }
+    },
     "nav": {
       "dashboard": "대시보드",
       "audit": "감사 로그",
@@ -209,6 +239,19 @@
       "prev": "이전",
       "next": "다음"
     }
+  },
+  "report": {
+    "button": "신고",
+    "title": "신고하기",
+    "reasonLabel": "사유",
+    "reasons": { "spam": "스팸", "scam": "사기", "prohibited": "금지 품목", "counterfeit": "위조품", "harassment": "괴롭힘", "wrong_category": "잘못된 분류", "other": "기타" },
+    "detailsPlaceholder": "추가 설명 (선택)…",
+    "submit": "신고 제출",
+    "cancel": "취소",
+    "success": "신고가 접수되었습니다. 감사합니다.",
+    "already_reported": "최근에 이미 신고했습니다.",
+    "not_authenticated": "신고하려면 로그인하세요.",
+    "error": "신고를 제출할 수 없습니다. 다시 시도하세요."
   },
   "auth": {
     "loginTitle": "다시 오신 것을 환영합니다",

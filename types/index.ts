@@ -18,6 +18,7 @@ export type Conversation   = T<'conversations'> & {
 export type Message        = T<'messages'>  & { sender?: UserProfile };
 export type Bid            = T<'bids'>       & { bidder?: UserProfile };
 export type Notification   = T<'notifications'>;
+export type Report         = T<'reports'>   & { reporter?: UserProfile; assignee?: UserProfile };
 export type Store          = T<'stores'>    & { owner?: UserProfile; listingCount?: number };
 export type StoreRequest   = T<'store_requests'> & { user?: UserProfile };
 
@@ -38,6 +39,10 @@ export type ListingCategory = E<'listing_category'>;
 export type ListingStatus   = E<'listing_status'>;
 export type SaleType        = E<'sale_type'>;
 export type AuctionStatus   = E<'auction_status'>;
+export type AccountStatus   = E<'account_status'>;
+export type ReportReason    = E<'report_reason'>;
+export type ReportStatus    = E<'report_status'>;
+export type ReportTarget    = E<'report_target'>;
 
 // ── UI types ──────────────────────────────────────────────
 export type SortOption = 'newest' | 'price_asc' | 'price_desc';

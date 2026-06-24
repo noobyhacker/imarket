@@ -181,6 +181,36 @@
       "save": "Сохранить",
       "cancel": "Отмена"
     },
+    "moderation": {
+      "title": "Модерация",
+      "tabReports": "Жалобы",
+      "tabListings": "Объявления",
+      "allStatuses": "Все статусы",
+      "allReasons": "Все причины",
+      "allTargets": "Все объекты",
+      "empty": "Нет жалоб по этим фильтрам.",
+      "noListings": "Объявления не найдены.",
+      "countLabel": "Всего: {count}",
+      "prev": "Назад",
+      "next": "Вперёд",
+      "claim": "Взять",
+      "removeListing": "Удалить объявление",
+      "resolve": "Решить",
+      "resolveTitle": "Решение по жалобе",
+      "resolutionPlaceholder": "Примечание к решению (обязательно)…",
+      "cancel": "Отмена",
+      "confirm": "Подтвердить",
+      "apply": "Применить",
+      "searchListings": "Поиск объявлений…",
+      "bulkRemove": "Удалить выбранные ({count})",
+      "bulkRemoveTitle": "Удалить объявления: {count}",
+      "reasonPlaceholder": "Причина (обязательно)…",
+      "byReporter": "от {name}",
+      "assignedTo": "назначено {name}",
+      "status": { "open": "Открыта", "in_review": "На проверке", "actioned": "Меры приняты", "dismissed": "Отклонена" },
+      "reasons": { "spam": "Спам", "scam": "Мошенничество", "prohibited": "Запрещённый товар", "counterfeit": "Подделка", "harassment": "Домогательство", "wrong_category": "Неверная категория", "other": "Другое" },
+      "targets": { "listing": "Объявление", "user": "Пользователь", "message": "Сообщение", "conversation": "Диалог" }
+    },
     "nav": {
       "dashboard": "Сводка",
       "audit": "Журнал действий",
@@ -209,6 +239,19 @@
       "prev": "Назад",
       "next": "Вперёд"
     }
+  },
+  "report": {
+    "button": "Пожаловаться",
+    "title": "Пожаловаться",
+    "reasonLabel": "Причина",
+    "reasons": { "spam": "Спам", "scam": "Мошенничество", "prohibited": "Запрещённый товар", "counterfeit": "Подделка", "harassment": "Домогательство", "wrong_category": "Неверная категория", "other": "Другое" },
+    "detailsPlaceholder": "Добавьте детали (необязательно)…",
+    "submit": "Отправить жалобу",
+    "cancel": "Отмена",
+    "success": "Спасибо — жалоба отправлена.",
+    "already_reported": "Вы уже недавно жаловались на это.",
+    "not_authenticated": "Войдите, чтобы пожаловаться.",
+    "error": "Не удалось отправить жалобу. Попробуйте снова."
   },
   "auth": {
     "loginTitle": "С возвращением",

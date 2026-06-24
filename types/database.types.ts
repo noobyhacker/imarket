@@ -356,6 +356,63 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          details: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string | null
+          resolution: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolution?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolution?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_listings: {
         Row: {
           created_at: string
@@ -588,6 +645,16 @@ export type Database = {
         | "services"
         | "other"
       listing_status: "active" | "sold" | "deleted"
+      report_reason:
+        | "spam"
+        | "scam"
+        | "prohibited"
+        | "counterfeit"
+        | "harassment"
+        | "wrong_category"
+        | "other"
+      report_status: "open" | "in_review" | "actioned" | "dismissed"
+      report_target: "listing" | "user" | "message" | "conversation"
       request_status: "pending" | "approved" | "rejected"
       sale_type: "fixed" | "auction"
       store_status: "active" | "inactive"
@@ -732,6 +799,9 @@ export const Constants = {
         "other",
       ],
       listing_status: ["active", "sold", "deleted"],
+      report_reason: ["spam", "scam", "prohibited", "counterfeit", "harassment", "wrong_category", "other"],
+      report_status: ["open", "in_review", "actioned", "dismissed"],
+      report_target: ["listing", "user", "message", "conversation"],
       request_status: ["pending", "approved", "rejected"],
       sale_type: ["fixed", "auction"],
       store_status: ["active", "inactive"],

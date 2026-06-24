@@ -181,6 +181,36 @@
       "save": "Save",
       "cancel": "Cancel"
     },
+    "moderation": {
+      "title": "Moderation",
+      "tabReports": "Reports",
+      "tabListings": "Listings",
+      "allStatuses": "All statuses",
+      "allReasons": "All reasons",
+      "allTargets": "All targets",
+      "empty": "No reports match these filters.",
+      "noListings": "No listings found.",
+      "countLabel": "{count} total",
+      "prev": "Previous",
+      "next": "Next",
+      "claim": "Claim",
+      "removeListing": "Remove listing",
+      "resolve": "Resolve",
+      "resolveTitle": "Resolve report",
+      "resolutionPlaceholder": "Resolution note (required)…",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "apply": "Apply",
+      "searchListings": "Search listings…",
+      "bulkRemove": "Remove {count} selected",
+      "bulkRemoveTitle": "Remove {count} listings",
+      "reasonPlaceholder": "Reason (required)…",
+      "byReporter": "by {name}",
+      "assignedTo": "assigned to {name}",
+      "status": { "open": "Open", "in_review": "In review", "actioned": "Actioned", "dismissed": "Dismissed" },
+      "reasons": { "spam": "Spam", "scam": "Scam", "prohibited": "Prohibited item", "counterfeit": "Counterfeit", "harassment": "Harassment", "wrong_category": "Wrong category", "other": "Other" },
+      "targets": { "listing": "Listing", "user": "User", "message": "Message", "conversation": "Conversation" }
+    },
     "nav": {
       "dashboard": "Dashboard",
       "audit": "Audit Log",
@@ -209,6 +239,19 @@
       "prev": "Previous",
       "next": "Next"
     }
+  },
+  "report": {
+    "button": "Report",
+    "title": "Report this",
+    "reasonLabel": "Reason",
+    "reasons": { "spam": "Spam", "scam": "Scam", "prohibited": "Prohibited item", "counterfeit": "Counterfeit", "harassment": "Harassment", "wrong_category": "Wrong category", "other": "Other" },
+    "detailsPlaceholder": "Add any details (optional)…",
+    "submit": "Submit report",
+    "cancel": "Cancel",
+    "success": "Thanks — your report was submitted.",
+    "already_reported": "You already reported this recently.",
+    "not_authenticated": "Please sign in to report.",
+    "error": "Could not submit report. Please try again."
   },
   "auth": {
     "loginTitle": "Welcome back",

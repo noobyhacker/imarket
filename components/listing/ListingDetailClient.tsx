@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabaseClient';
 import { toggleListingStatus, deleteOwnListing } from '@/lib/listingActions';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl, getAvatarUrl } from '@/lib/utils';
 import { flagEmoji, getCountryName } from '@/lib/countries';
+import ReportButton from '@/components/ReportButton';
 import type { Listing, UserProfile } from '@/types';
 
 interface ListingDetailClientProps {
@@ -275,6 +276,12 @@ export default function ListingDetailClient({
                   {lang}
                 </span>
               ))}
+            </div>
+          )}
+
+          {currentUser && !isSeller && (
+            <div className="mt-5 border-t border-border pt-4">
+              <ReportButton targetType="listing" targetId={listing.id} />
             </div>
           )}
         </div>

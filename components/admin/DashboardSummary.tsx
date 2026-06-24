@@ -36,8 +36,8 @@ export default async function DashboardSummary({ kpis, trends }: Props) {
     { icon: ShieldAlert, label: t('flaggedUsers'), value: kpis.flaggedUsers },
   ];
 
-  // Only routes that exist today. The moderation queue tile is added in Phase 4.
   const queues = [
+    { icon: Flag, label: t('openReports'), count: kpis.openReports, href: '/admin/moderation', tone: 'amber' as const },
     { icon: Store, label: t('pendingStores'), count: kpis.pendingStores, href: '/admin?tab=storeRequests', tone: 'blue' as const },
     { icon: Package, label: t('reviewListings'), count: kpis.activeListings, href: '/admin?tab=listings', tone: 'slate' as const },
     { icon: Users, label: t('users'), count: undefined, href: '/admin?tab=users', tone: 'slate' as const },

@@ -4,6 +4,7 @@ import { createAdminSupabaseClient, createServerSupabaseClient } from '@/lib/sup
 import { revalidatePath } from 'next/cache';
 import { assertRole, type AdminRole } from '@/lib/adminAuth';
 import { logAdminAction } from '@/lib/auditLog';
+import type { ListingCategory, ReportStatus } from '@/types';
 
 export async function adminDeleteListing(id: string, reason?: string) {
   await assertRole('moderator');
@@ -208,4 +209,70 @@ export async function adminAddUserNote(id: string, note: string) {
   // Internal notes live in the append-only audit log (no separate table).
   await logAdminAction({ action: 'user.note', targetType: 'user', targetId: id, reason: note.trim() });
   revalidatePath(`/admin/users/${id}`);
+}
+
+// ── Reports & content moderation (Phase 4) ─────────────────────────────────
+
+/** Claim a report and move it into review. */
+export async function adminAssignReport(reportId: string) {
+  const ctx = await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase
+    .from('reports')
+    .update({ assigned_to: ctx.userId, status: 'in_review' })
+    .eq('id', reportId);
+  if (error) throw error;
+  await logAdminAction({ action: 'report.assign', targetType: 'report', targetId: reportId });
+  revalidatePath('/admin/moderation');
+}
+
+/** Resolve a report (actioned/dismissed) with a required resolution note, and
+ *  notify the reporter of the outcome. */
+export async function adminResolveReport(reportId: string, status: ReportStatus, resolution: string) {
+  await assertRole('moderator');
+  if ((status === 'actioned' || status === 'dismissed') && !resolution?.trim()) {
+    throw new Error('A resolution note is required');
+  }
+  const supabase = await createAdminSupabaseClient();
+  const { data: rep } = await supabase.from('reports').select('reporter_id').eq('id', reportId).single();
+  const { error } = await supabase
+    .from('reports')
+    .update({ status, resolution: resolution?.trim() || null })
+    .eq('id', reportId);
+  if (error) throw error;
+  if (rep?.reporter_id) {
+    await supabase.from('notifications').insert({
+      user_id: rep.reporter_id,
+      type: 'report_update',
+      title: status === 'actioned' ? 'Action taken on your report' : 'Your report was reviewed',
+      body: resolution?.trim() || null,
+      link: '/',
+    });
+  }
+  await logAdminAction({ action: `report.${status}`, targetType: 'report', targetId: reportId, reason: resolution?.trim() });
+  revalidatePath('/admin/moderation');
+}
+
+/** Recategorize a listing (moderation correction). */
+export async function adminSetListingCategory(id: string, category: ListingCategory) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('listings').update({ category }).eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: 'listing.recategorize', targetType: 'listing', targetId: id, after: { category } });
+  revalidatePath('/admin/moderation');
+  revalidatePath(`/listing/${id}`);
+}
+
+/** Soft-remove many listings at once (reason required). */
+export async function adminBulkRemoveListings(ids: string[], reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  if (ids.length === 0) return;
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('listings').update({ status: 'deleted' }).in('id', ids);
+  if (error) throw error;
+  await logAdminAction({ action: 'listing.bulk_remove', targetType: 'listing', targetId: ids.join(','), reason: reason.trim(), after: { count: ids.length } });
+  revalidatePath('/admin/moderation');
+  revalidatePath('/');
 }

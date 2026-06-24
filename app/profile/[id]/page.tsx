@@ -4,6 +4,7 @@ import { getUserProfile, getListingsBySeller, getCurrentUser } from '@/lib/queri
 import ProfileClient from '@/components/profile/ProfileClient';
 import BottomNav from '@/components/BottomNav';
 import TopNav from '@/components/TopNav';
+import ReportButton from '@/components/ReportButton';
 
 interface ProfilePageProps {
   params: { id: string };
@@ -33,6 +34,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         soldListings={soldListings}
         isOwnProfile={currentUser?.id === params.id}
       />
+      {currentUser && currentUser.id !== params.id && (
+        <div className="mx-auto max-w-lg px-4 py-4">
+          <ReportButton targetType="user" targetId={params.id} />
+        </div>
+      )}
       <BottomNav />
     </div>
   );
