@@ -332,3 +332,53 @@ export async function adminBulkRemoveListings(ids: string[], reason: string) {
   revalidatePath('/admin/moderation');
   revalidatePath('/');
 }
+
+// ── Auction oversight (Phase 6) ─────────────────────────────────────────────
+
+/** Call a SECURITY DEFINER admin RPC through the session client (so its
+ *  can_moderate() check sees the caller's JWT) and unwrap the typed result. */
+async function callAdminRpc(
+  fn: 'admin_cancel_auction' | 'admin_void_bid' | 'admin_extend_auction' | 'admin_force_close',
+  args: Record<string, unknown>
+) {
+  const session = await createServerSupabaseClient();
+  const { data, error } = await session.rpc(fn, args as never);
+  if (error) throw error;
+  const res = data as { ok: boolean; error?: string } | null;
+  if (!res?.ok) throw new Error(res?.error ?? 'rpc_failed');
+  return res;
+}
+
+export async function adminCancelAuction(id: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  await callAdminRpc('admin_cancel_auction', { p_id: id, p_reason: reason.trim() });
+  await logAdminAction({ action: 'auction.cancel', targetType: 'listing', targetId: id, reason: reason.trim() });
+  revalidatePath('/admin/auctions');
+  revalidatePath(`/listing/${id}`);
+}
+
+export async function adminVoidBid(bidId: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const res = await callAdminRpc('admin_void_bid', { p_bid_id: bidId, p_reason: reason.trim() });
+  await logAdminAction({ action: 'auction.void_bid', targetType: 'bid', targetId: bidId, reason: reason.trim(), after: res });
+  revalidatePath('/admin/auctions');
+}
+
+export async function adminExtendAuction(id: string, newEndIso: string) {
+  await assertRole('moderator');
+  if (!newEndIso) throw new Error('A new end time is required');
+  await callAdminRpc('admin_extend_auction', { p_id: id, p_new_end: newEndIso });
+  await logAdminAction({ action: 'auction.extend', targetType: 'listing', targetId: id, after: { auction_end: newEndIso } });
+  revalidatePath('/admin/auctions');
+  revalidatePath(`/listing/${id}`);
+}
+
+export async function adminForceCloseAuction(id: string) {
+  await assertRole('moderator');
+  await callAdminRpc('admin_force_close', { p_id: id });
+  await logAdminAction({ action: 'auction.force_close', targetType: 'listing', targetId: id });
+  revalidatePath('/admin/auctions');
+  revalidatePath(`/listing/${id}`);
+}

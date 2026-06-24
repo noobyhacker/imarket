@@ -614,7 +614,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_cancel_auction: { Args: { p_id: string; p_reason: string }; Returns: Json }
+      admin_extend_auction: { Args: { p_id: string; p_new_end: string }; Returns: Json }
+      admin_force_close: { Args: { p_id: string }; Returns: Json }
       admin_force_logout: { Args: { target: string }; Returns: undefined }
+      admin_void_bid: { Args: { p_bid_id: string; p_reason: string }; Returns: Json }
       can_moderate: { Args: never; Returns: boolean }
       close_due_auctions: { Args: never; Returns: number }
       current_admin_role: {

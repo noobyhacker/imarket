@@ -235,6 +235,25 @@
       "reasonTitle": { "reject": "Отклонить заявку", "revoke": "Снять верификацию", "suspend": "Приостановить магазин" },
       "status": { "active": "Активен", "suspended": "Приостановлен", "inactive": "Неактивен" }
     },
+    "auctions": {
+      "title": "Надзор за аукционами",
+      "empty": "Аукционы не найдены.",
+      "currentBid": "Текущая ставка",
+      "bidders": "Участников: {count}",
+      "ends": "завершение",
+      "suspicious": "Подозрительные ставки",
+      "extend": "Продлить",
+      "forceClose": "Закрыть",
+      "cancel": "Отменить",
+      "showBids": "Ставки ({count})",
+      "hideBids": "Скрыть ставки",
+      "voidBid": "Аннулировать",
+      "reasonPlaceholder": "Причина (обязательно)…",
+      "cancelBtn": "Отмена",
+      "confirm": "Подтвердить",
+      "status": { "scheduled": "Запланирован", "live": "Идёт", "ended": "Завершён", "cancelled": "Отменён" },
+      "modalTitle": { "cancel": "Отменить аукцион", "voidbid": "Аннулировать ставку", "extend": "Продлить аукцион" }
+    },
     "nav": {
       "dashboard": "Сводка",
       "audit": "Журнал действий",

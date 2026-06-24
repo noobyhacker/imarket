@@ -177,4 +177,10 @@ Enforced by `assertRole(min)` (`lib/adminAuth.ts`, role rank support<moderator<s
 - **Actions (`lib/adminActions.ts`)**: existing approve/reject/doc-URL now role-gated + audited; new `adminRevokeStoreVerification`/`adminReverifyStore` (reversible badge) and `adminSuspendStore`/`adminUnsuspendStore` (reason-gated, owner notified, audited).
 - **UI** (`/admin/stores`): pending-application queue (business name, 사업자등록번호, signed-URL document viewer, contact, applicant) → approve/reject(reason); existing-store management (verified/status badges, revoke/re-verify, suspend/unsuspend, link to public store). Dashboard tile + nav now point here.
 - **Verification**: `npm run build` + `npm run lint` pass.
+
+## Phase 6 — Auction Oversight ✅
+- **Migration `0013_auction_admin.sql`**: SECURITY DEFINER RPCs (each checks `can_moderate()` against the caller's JWT, granted to `authenticated` only): `admin_cancel_auction`, `admin_void_bid` (recomputes `current_bid`/`current_winner_id` from remaining bids), `admin_extend_auction`, `admin_force_close` (reuses `finalize_auction`). All notify affected users.
+- **Actions (`lib/adminActions.ts`)**: `adminCancelAuction`/`adminVoidBid`/`adminExtendAuction`/`adminForceCloseAuction` call the RPCs via the session client + audit each.
+- **UI** (`/admin/auctions`): scheduled/live/ended/cancelled list with current bid, bidder count, ending time, expandable bid history (per-bid void), and cancel/extend/force-close actions. Heuristic flags any auction where one bidder placed ≥5 bids. Nav entry added.
+- **Verification**: `npm run build` passes. SQL proof — voiding the top bid recomputed the high bid to the next-highest and reassigned the winner.
 - **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).

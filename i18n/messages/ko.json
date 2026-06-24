@@ -235,6 +235,25 @@
       "reasonTitle": { "reject": "신청 거절", "revoke": "인증 해제", "suspend": "상점 정지" },
       "status": { "active": "활성", "suspended": "정지", "inactive": "비활성" }
     },
+    "auctions": {
+      "title": "경매 관리",
+      "empty": "경매가 없습니다.",
+      "currentBid": "현재 입찰가",
+      "bidders": "입찰자 {count}명",
+      "ends": "종료",
+      "suspicious": "의심 입찰",
+      "extend": "연장",
+      "forceClose": "강제 종료",
+      "cancel": "취소",
+      "showBids": "입찰 ({count})",
+      "hideBids": "입찰 숨기기",
+      "voidBid": "무효",
+      "reasonPlaceholder": "사유 (필수)…",
+      "cancelBtn": "취소",
+      "confirm": "확인",
+      "status": { "scheduled": "예정", "live": "진행중", "ended": "종료", "cancelled": "취소됨" },
+      "modalTitle": { "cancel": "경매 취소", "voidbid": "입찰 무효", "extend": "경매 연장" }
+    },
     "nav": {
       "dashboard": "대시보드",
       "audit": "감사 로그",

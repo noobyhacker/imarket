@@ -15,6 +15,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin', key: 'dashboard', min: 'support' },
   { href: '/admin/moderation', key: 'moderation', min: 'support' },
   { href: '/admin/stores', key: 'stores', min: 'support' },
+  { href: '/admin/auctions', key: 'auctions', min: 'support' },
   { href: '/admin/users', key: 'users', min: 'support' },
   { href: '/admin/audit', key: 'audit', min: 'support' },
 ];

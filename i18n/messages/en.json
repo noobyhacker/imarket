@@ -235,6 +235,25 @@
       "reasonTitle": { "reject": "Reject application", "revoke": "Revoke verification", "suspend": "Suspend store" },
       "status": { "active": "Active", "suspended": "Suspended", "inactive": "Inactive" }
     },
+    "auctions": {
+      "title": "Auction oversight",
+      "empty": "No auctions found.",
+      "currentBid": "Current bid",
+      "bidders": "{count} bidders",
+      "ends": "ends",
+      "suspicious": "Suspicious bidding",
+      "extend": "Extend",
+      "forceClose": "Force close",
+      "cancel": "Cancel",
+      "showBids": "Bids ({count})",
+      "hideBids": "Hide bids",
+      "voidBid": "Void",
+      "reasonPlaceholder": "Reason (required)…",
+      "cancelBtn": "Cancel",
+      "confirm": "Confirm",
+      "status": { "scheduled": "Scheduled", "live": "Live", "ended": "Ended", "cancelled": "Cancelled" },
+      "modalTitle": { "cancel": "Cancel auction", "voidbid": "Void bid", "extend": "Extend auction" }
+    },
     "nav": {
       "dashboard": "Dashboard",
       "audit": "Audit Log",
