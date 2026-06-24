@@ -171,4 +171,10 @@ Enforced by `assertRole(min)` (`lib/adminAuth.ts`, role rank support<moderator<s
 - **Admin moderation** (`/admin/moderation`, tabbed): **report queue** (`ReportQueueClient`) — filter by status/reason/target, claim → in_review, resolve (actioned/dismissed, required note → reporter notified), quick remove-listing; **listings review** (`ListingModerationClient`) — search, per-row recategorize, multi-select bulk remove (reason required). Actions: `adminAssignReport`, `adminResolveReport`, `adminSetListingCategory`, `adminBulkRemoveListings` — all role-gated + audited. Dashboard "Open reports" tile + nav entry now link here.
 - **Deferred to Phase 9**: prohibited-keyword auto-flag (depends on the `banned_keywords` table built in Phase 9, which will add the insert/update trigger that auto-creates reports).
 - **Verification**: `npm run build` + `npm run lint` pass. SQL proof — an active user can file a report and read their own via RLS.
+
+## Phase 5 — Store Verification Queue ✅
+- **Migrations**: `0011_store_status_suspended.sql` adds `suspended` to `store_status`; `0012_store_listing_visibility.sql` rewrites the public listings SELECT policy so a **suspended store's listings drop out of public view** (owner-scoped policy + service role still see them).
+- **Actions (`lib/adminActions.ts`)**: existing approve/reject/doc-URL now role-gated + audited; new `adminRevokeStoreVerification`/`adminReverifyStore` (reversible badge) and `adminSuspendStore`/`adminUnsuspendStore` (reason-gated, owner notified, audited).
+- **UI** (`/admin/stores`): pending-application queue (business name, 사업자등록번호, signed-URL document viewer, contact, applicant) → approve/reject(reason); existing-store management (verified/status badges, revoke/re-verify, suspend/unsuspend, link to public store). Dashboard tile + nav now point here.
+- **Verification**: `npm run build` + `npm run lint` pass.
 - **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).

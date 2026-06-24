@@ -113,6 +113,62 @@ export async function adminGetStoreDocUrl(path: string): Promise<string | null> 
   return data?.signedUrl ?? null;
 }
 
+/** Remove a store's verified badge (reason required). Reversible via re-verify. */
+export async function adminRevokeStoreVerification(id: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const supabase = await createAdminSupabaseClient();
+  const { data: store } = await supabase.from('stores').select('owner_id, name').eq('id', id).single();
+  const { error } = await supabase.from('stores').update({ verified: false }).eq('id', id);
+  if (error) throw error;
+  if (store?.owner_id) {
+    await supabase.from('notifications').insert({
+      user_id: store.owner_id, type: 'store_unverified',
+      title: 'Your store verification was removed', body: reason.trim(), link: '/',
+    });
+  }
+  await logAdminAction({ action: 'store.revoke_verification', targetType: 'store', targetId: id, reason: reason.trim() });
+  revalidatePath('/admin/stores');
+}
+
+export async function adminReverifyStore(id: string) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('stores').update({ verified: true }).eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: 'store.reverify', targetType: 'store', targetId: id });
+  revalidatePath('/admin/stores');
+}
+
+/** Suspend a store — its listings drop out of public view (RLS). */
+export async function adminSuspendStore(id: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const supabase = await createAdminSupabaseClient();
+  const { data: store } = await supabase.from('stores').select('owner_id').eq('id', id).single();
+  const { error } = await supabase.from('stores').update({ status: 'suspended' }).eq('id', id);
+  if (error) throw error;
+  if (store?.owner_id) {
+    await supabase.from('notifications').insert({
+      user_id: store.owner_id, type: 'store_suspended',
+      title: 'Your store was suspended', body: reason.trim(), link: '/',
+    });
+  }
+  await logAdminAction({ action: 'store.suspend', targetType: 'store', targetId: id, reason: reason.trim() });
+  revalidatePath('/admin/stores');
+  revalidatePath('/stores');
+}
+
+export async function adminUnsuspendStore(id: string) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('stores').update({ status: 'active' }).eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: 'store.unsuspend', targetType: 'store', targetId: id });
+  revalidatePath('/admin/stores');
+  revalidatePath('/stores');
+}
+
 // ── User moderation (Phase 3) ───────────────────────────────────────────────
 
 async function notifyUser(

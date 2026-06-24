@@ -38,7 +38,7 @@ export default async function DashboardSummary({ kpis, trends }: Props) {
 
   const queues = [
     { icon: Flag, label: t('openReports'), count: kpis.openReports, href: '/admin/moderation', tone: 'amber' as const },
-    { icon: Store, label: t('pendingStores'), count: kpis.pendingStores, href: '/admin?tab=storeRequests', tone: 'blue' as const },
+    { icon: Store, label: t('pendingStores'), count: kpis.pendingStores, href: '/admin/stores', tone: 'blue' as const },
     { icon: Package, label: t('reviewListings'), count: kpis.activeListings, href: '/admin?tab=listings', tone: 'slate' as const },
     { icon: Users, label: t('users'), count: undefined, href: '/admin?tab=users', tone: 'slate' as const },
     { icon: MessageSquare, label: t('chats'), count: undefined, href: '/admin?tab=chats', tone: 'slate' as const },

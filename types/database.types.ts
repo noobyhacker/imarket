@@ -657,7 +657,7 @@ export type Database = {
       report_target: "listing" | "user" | "message" | "conversation"
       request_status: "pending" | "approved" | "rejected"
       sale_type: "fixed" | "auction"
-      store_status: "active" | "inactive"
+      store_status: "active" | "inactive" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -804,7 +804,7 @@ export const Constants = {
       report_target: ["listing", "user", "message", "conversation"],
       request_status: ["pending", "approved", "rejected"],
       sale_type: ["fixed", "auction"],
-      store_status: ["active", "inactive"],
+      store_status: ["active", "inactive", "suspended"],
     },
   },
 } as const
