@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { toggleListingStatus, deleteOwnListing } from '@/lib/listingActions';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl, getAvatarUrl } from '@/lib/utils';
+import { flagEmoji, getCountryName } from '@/lib/countries';
 import type { Listing, UserProfile } from '@/types';
 
 interface ListingDetailClientProps {
@@ -231,7 +232,14 @@ export default function ListingDetailClient({
             {tCategories(listing.category as Parameters<typeof tCategories>[0])}
           </p>
           <h2 className="mt-1 text-xl font-bold text-foreground">{listing.title_original}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">{formatRelativeTime(listing.created_at)}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <p className="text-xs text-muted-foreground">{formatRelativeTime(listing.created_at)}</p>
+            {listing.origin_country_code && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+                {flagEmoji(listing.origin_country_code)} {getCountryName(listing.origin_country_code)}
+              </span>
+            )}
+          </div>
           <p className="mt-4 text-sm leading-relaxed text-foreground/80">{listing.description_original}</p>
 
           {seller?.languages && seller.languages.length > 0 && (

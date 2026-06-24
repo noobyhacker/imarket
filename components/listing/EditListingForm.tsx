@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabaseClient';
 import { updateListing } from '@/lib/listingActions';
 import { getSupabaseImageUrl } from '@/lib/utils';
+import CountrySelect from '@/components/listing/CountrySelect';
 import type { Listing, ListingCategory } from '@/types';
 
 const CATEGORIES: ListingCategory[] = [
@@ -38,6 +39,9 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
   const [category, setCategory] = useState<ListingCategory>(listing.category as ListingCategory);
   const [description, setDescription] = useState(listing.description_original);
   const [location, setLocation] = useState(listing.location ?? '');
+  const [originCountry, setOriginCountry] = useState<string | null>(
+    (listing as Listing & { origin_country_code?: string | null }).origin_country_code ?? null
+  );
   const [languages, setLanguages] = useState<ListingLanguage[]>(
     (listing.languages ?? []) as ListingLanguage[]
   );
@@ -114,6 +118,7 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
         category,
         location,
         languages,
+        origin_country_code: originCountry,
       });
 
       router.push(`/listing/${listing.id}`);
@@ -182,6 +187,11 @@ export default function EditListingForm({ listing }: EditListingFormProps) {
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</label>
           <input value={location} onChange={(e) => setLocation(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary" />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country of Origin</label>
+          <CountrySelect value={originCountry} onChange={setOriginCountry} placeholder="Where is this item from?" />
         </div>
 
         <div>

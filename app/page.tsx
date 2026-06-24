@@ -13,6 +13,7 @@ interface HomePageProps {
     sort?: string;
     filter?: string;
     lang?: string;
+    origin?: string;
   };
 }
 
@@ -22,6 +23,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const sort = (searchParams.sort as SortOption) || 'newest';
   const englishFriendly = searchParams.filter === 'english';
   const language = searchParams.lang || undefined;
+  const originCountries = (searchParams.origin ?? '').split(',').filter(Boolean);
 
   const [listings, user] = await Promise.all([
     getListings({
@@ -31,6 +33,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       sort,
       englishFriendly,
       language,
+      originCountries,
     }).catch(() => []),
     getCurrentUser().catch(() => null),
   ]);

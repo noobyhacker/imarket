@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
+import CountrySelect from '@/components/listing/CountrySelect';
 import type { ListingCategory } from '@/types';
 
 const CATEGORIES: ListingCategory[] = [
@@ -37,6 +38,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const [category, setCategory] = useState<ListingCategory | ''>('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [originCountry, setOriginCountry] = useState<string | null>(null);
   const [languages, setLanguages] = useState<ListingLanguage[]>(['English', 'Korean']);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -140,6 +142,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           english_friendly: languages.includes('English'),
           foreigner_safe: true,
           languages,
+          origin_country_code: originCountry,
           images: imagePaths,
           status: 'active',
         })
@@ -258,6 +261,12 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
             placeholder={t('locationPlaceholder')}
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country of Origin</label>
+          <CountrySelect value={originCountry} onChange={setOriginCountry} placeholder="Where is this item from?" />
+          <p className="mt-1.5 text-xs text-muted-foreground">Helps buyers find items from their home country.</p>
         </div>
 
         <div>

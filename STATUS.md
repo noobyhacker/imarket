@@ -29,9 +29,16 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 - `components/listing/ListingDetailClient.tsx`: Share wired (native share → clipboard fallback), heart reflects real saved state on load.
 - Re-audit: zero non-`working` elements.
 
-## Phase 2 — Country of origin
+## Phase 2 — Country of origin (DONE)
 
-_Pending._
+- **Migration:** `supabase/migrations/0001_country_of_origin.sql` — adds `listings.origin_country_code` (ISO alpha-2, nullable = unspecified) + index. **⚠ Run this in the Supabase SQL editor for project `izwshmdscanpidkxrniu`** (MCP could not reach it — see note below).
+- **Data:** `lib/countries.ts` — full ISO list + `flagEmoji()` (derived) + `getCountryLabel/Name()`.
+- **Forms:** `components/listing/CountrySelect.tsx` (searchable) wired into Create + Edit forms; persisted via insert + `updateListing` action.
+- **Filter:** multi-select `OriginFilter` in `ListingFilters.tsx` → `origin` URL param (comma-separated, shareable, survives refresh); `getListings` adds `.in('origin_country_code', codes)`, combines with all existing filters.
+- **Display:** flag+name chip on `ItemCard`, `ListingFeed` grid card, and listing detail.
+- `Listing` type augmented in `types/index.ts` (generated types not regenerated — no MCP access to live project).
+
+> **MCP/DB note:** `.env.local` points at Supabase project `izwshmdscanpidkxrniu`, which is NOT in the account connected to the Supabase MCP (only *Webforge CRM* + *Forms* are). Migrations are therefore delivered as files to run manually, not applied via MCP. Reconnect the owning Supabase account to the MCP to restore auto-apply.
 
 ## Phase 3 — Auctions
 

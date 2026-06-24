@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl } from '@/lib/utils';
+import { flagEmoji, getCountryName } from '@/lib/countries';
 import type { Listing } from '@/types';
 
 interface ItemCardProps {
@@ -76,10 +77,15 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
 
           <div>
             <p className="text-lg font-bold text-foreground">{formatPrice(item.price)}</p>
-            <div className="mt-1 flex gap-1.5">
+            <div className="mt-1 flex flex-wrap gap-1.5">
               {item.english_friendly && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-trust-light px-2 py-0.5 text-[10px] font-semibold text-trust">
                   <Globe size={10} /> EN
+                </span>
+              )}
+              {item.origin_country_code && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">
+                  {flagEmoji(item.origin_country_code)} {getCountryName(item.origin_country_code)}
                 </span>
               )}
             </div>

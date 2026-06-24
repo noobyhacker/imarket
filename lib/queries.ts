@@ -21,6 +21,7 @@ export async function getListings({
   sort = 'newest',
   englishFriendly,
   language,
+  originCountries,
   page = 0,
   limit = 20,
 }: {
@@ -30,6 +31,7 @@ export async function getListings({
   sort?: SortOption;
   englishFriendly?: boolean;
   language?: string;
+  originCountries?: string[];
   page?: number;
   limit?: number;
 }): Promise<Listing[]> {
@@ -49,6 +51,10 @@ export async function getListings({
 
   if (category) {
     query = query.eq('category', category);
+  }
+
+  if (originCountries && originCountries.length > 0) {
+    query = query.in('origin_country_code', originCountries);
   }
 
   if (location) {

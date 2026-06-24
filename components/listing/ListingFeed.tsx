@@ -62,6 +62,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { formatPrice, formatRelativeTime, getSupabaseImageUrl } from '@/lib/utils';
+import { flagEmoji, getCountryName } from '@/lib/countries';
 
 function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Listing; currentUserId?: string; initialSaved?: boolean }) {
   const router = useRouter();
@@ -109,13 +110,20 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
       <Link href={`/listing/${item.id}`} className="block p-3">
         <p className="truncate text-sm font-semibold text-foreground">{item.title_original}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{item.location} · {formatRelativeTime(item.created_at)}</p>
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex items-center justify-between gap-1">
           <p className="text-base font-bold text-foreground">{formatPrice(item.price)}</p>
-          {item.english_friendly && (
-            <span className="flex items-center gap-0.5 rounded-full bg-trust-light px-2 py-0.5 text-[10px] font-semibold text-trust">
-              <Globe size={10} /> EN
-            </span>
-          )}
+          <div className="flex flex-wrap items-center justify-end gap-1">
+            {item.origin_country_code && (
+              <span className="flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">
+                {flagEmoji(item.origin_country_code)} {getCountryName(item.origin_country_code)}
+              </span>
+            )}
+            {item.english_friendly && (
+              <span className="flex items-center gap-0.5 rounded-full bg-trust-light px-2 py-0.5 text-[10px] font-semibold text-trust">
+                <Globe size={10} /> EN
+              </span>
+            )}
+          </div>
         </div>
       </Link>
     </div>

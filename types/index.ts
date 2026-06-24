@@ -5,7 +5,9 @@ export type { Tables, TablesInsert, TablesUpdate, Enums } from './database.types
 // ── Convenience row types ──────────────────────────────────
 import type { Tables as T } from './database.types';
 
-export type Listing        = T<'listings'>  & { seller?: UserProfile };
+// `origin_country_code` is added in migration 0001 (Phase 2) and is not yet in the
+// generated database.types.ts (types can't be regenerated against the live project here).
+export type Listing        = T<'listings'>  & { seller?: UserProfile; origin_country_code?: string | null };
 export type UserProfile    = T<'users'>;
 export type Conversation   = T<'conversations'> & {
   listing?: Pick<T<'listings'>, 'id' | 'title_original' | 'title_translated' | 'images' | 'price'>;

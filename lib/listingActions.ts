@@ -32,6 +32,7 @@ export async function updateListing(
     category: ListingCategory;
     location: string;
     languages: string[];
+    origin_country_code?: string | null;
   }
 ) {
   const { supabase } = await assertOwner(id);
@@ -53,6 +54,7 @@ export async function updateListing(
       location: updates.location,
       languages: updates.languages,
       english_friendly: updates.languages.includes('English'),
+      origin_country_code: updates.origin_country_code ?? null,
     })
     .eq('id', id);
 
