@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
+import { USER_PUBLIC_COLS } from '@/lib/userColumns';
 import type { Bid } from '@/types';
 
 export function useRealtimeBids(listingId: string, initialBids: Bid[]) {
@@ -24,7 +25,7 @@ export function useRealtimeBids(listingId: string, initialBids: Bid[]) {
           const newBid = payload.new as Bid;
           const { data: bidder } = await supabase
             .from('users')
-            .select('id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language')
+            .select(USER_PUBLIC_COLS)
             .eq('id', newBid.bidder_id)
             .single();
 

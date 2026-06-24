@@ -3,15 +3,9 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import { getCurrentUser } from '@/lib/queries';
+import { emailInAllowlist } from '@/lib/adminEmails';
 import { getAvatarUrl, getSupabaseImageUrl, formatPrice, formatRelativeTime } from '@/lib/utils';
 import type { Conversation, Message } from '@/types';
-
-function isAdminEmail(email: string | null | undefined) {
-  const allowList = (process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? '')
-    .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-  if (!email || allowList.length === 0) return false;
-  return allowList.includes(email.trim().toLowerCase());
-}
 
 interface Props {
   params: { id: string };
@@ -19,7 +13,9 @@ interface Props {
 
 export default async function AdminChatViewPage({ params }: Props) {
   const user = await getCurrentUser().catch(() => null);
-  if (!user || !isAdminEmail(user.email)) redirect('/admin');
+  const allowed = user
+    && (user.is_admin || emailInAllowlist(user.email, process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL));
+  if (!allowed) redirect('/admin');
 
   const supabase = await createAdminSupabaseClient();
 

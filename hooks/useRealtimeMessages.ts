@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
+import { USER_PUBLIC_COLS } from '@/lib/userColumns';
 import type { Message } from '@/types';
 
 export function useRealtimeMessages(
@@ -28,7 +29,7 @@ export function useRealtimeMessages(
           // Fetch sender profile
           const { data: sender } = await supabase
             .from('users')
-            .select('id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language')
+            .select(USER_PUBLIC_COLS)
             .eq('id', newMsg.sender_id)
             .single();
 

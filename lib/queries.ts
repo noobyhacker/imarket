@@ -1,13 +1,9 @@
 import { createServerSupabaseClient } from './supabaseServer';
+import { USER_PUBLIC_COLS } from './userColumns';
 import type { Bid, Listing, ListingCategory, SortOption, Store, StoreRequest, UserProfile } from '@/types';
 
-// Public profile columns — deliberately EXCLUDES `email`. Email is only ever
-// read for the current user (sourced from the auth session, see getCurrentUser)
-// or by the admin service-role client. The `email` column is revoked from the
-// anon/authenticated roles at the DB level (migration 0005), so never select it
-// in client/anon-context reads.
-export const USER_PUBLIC_COLS =
-  'id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language';
+// Re-export for callers that already import it from queries.
+export { USER_PUBLIC_COLS };
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
   const supabase = await createServerSupabaseClient();
@@ -209,19 +205,20 @@ export async function getStores(search?: string): Promise<Store[]> {
   const { data, error } = await query;
   if (error) return [];
   const stores = (data ?? []) as Store[];
+  if (stores.length === 0) return stores;
 
-  // Listing count per store
-  const withCounts = await Promise.all(
-    stores.map(async (s) => {
-      const { count } = await supabase
-        .from('listings')
-        .select('id', { count: 'exact', head: true })
-        .eq('store_id', s.id)
-        .eq('status', 'active');
-      return { ...s, listingCount: count ?? 0 };
-    })
-  );
-  return withCounts;
+  // Listing counts for all stores in a single query, tallied in memory.
+  const { data: rows } = await supabase
+    .from('listings')
+    .select('store_id')
+    .in('store_id', stores.map((s) => s.id))
+    .eq('status', 'active');
+
+  const counts = new Map<string, number>();
+  for (const r of (rows ?? []) as { store_id: string | null }[]) {
+    if (r.store_id) counts.set(r.store_id, (counts.get(r.store_id) ?? 0) + 1);
+  }
+  return stores.map((s) => ({ ...s, listingCount: counts.get(s.id) ?? 0 }));
 }
 
 export async function getStoreById(id: string): Promise<Store | null> {

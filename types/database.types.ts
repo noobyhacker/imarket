@@ -7,8 +7,52 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
+      bids: {
+        Row: {
+          amount: number
+          bidder_id: string
+          created_at: string
+          id: string
+          listing_id: string
+        }
+        Insert: {
+          amount: number
+          bidder_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+        }
+        Update: {
+          amount?: number
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_bidder_id_fkey"
+            columns: ["bidder_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           buyer_id: string
@@ -69,17 +113,26 @@ export type Database = {
       }
       listings: {
         Row: {
+          auction_end: string | null
+          auction_start: string | null
+          auction_status: Database["public"]["Enums"]["auction_status"] | null
+          bid_increment: number | null
           category: Database["public"]["Enums"]["listing_category"]
           created_at: string
+          current_bid: number | null
+          current_winner_id: string | null
           description_original: string
           description_translated: string | null
           english_friendly: boolean
           foreigner_safe: boolean
           id: string
           images: string[]
-          languages: string[]
+          languages: string[] | null
           location: string
+          origin_country_code: string | null
           price: number
+          sale_type: Database["public"]["Enums"]["sale_type"]
+          starting_price: number | null
           status: Database["public"]["Enums"]["listing_status"]
           store_id: string | null
           title_original: string
@@ -88,17 +141,26 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auction_end?: string | null
+          auction_start?: string | null
+          auction_status?: Database["public"]["Enums"]["auction_status"] | null
+          bid_increment?: number | null
           category: Database["public"]["Enums"]["listing_category"]
           created_at?: string
+          current_bid?: number | null
+          current_winner_id?: string | null
           description_original?: string
           description_translated?: string | null
           english_friendly?: boolean
           foreigner_safe?: boolean
           id?: string
           images?: string[]
-          languages?: string[]
+          languages?: string[] | null
           location?: string
+          origin_country_code?: string | null
           price: number
+          sale_type?: Database["public"]["Enums"]["sale_type"]
+          starting_price?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           store_id?: string | null
           title_original: string
@@ -107,17 +169,26 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auction_end?: string | null
+          auction_start?: string | null
+          auction_status?: Database["public"]["Enums"]["auction_status"] | null
+          bid_increment?: number | null
           category?: Database["public"]["Enums"]["listing_category"]
           created_at?: string
+          current_bid?: number | null
+          current_winner_id?: string | null
           description_original?: string
           description_translated?: string | null
           english_friendly?: boolean
           foreigner_safe?: boolean
           id?: string
           images?: string[]
-          languages?: string[]
+          languages?: string[] | null
           location?: string
+          origin_country_code?: string | null
           price?: number
+          sale_type?: Database["public"]["Enums"]["sale_type"]
+          starting_price?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           store_id?: string | null
           title_original?: string
@@ -126,6 +197,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "listings_current_winner_id_fkey"
+            columns: ["current_winner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "listings_store_id_fkey"
             columns: ["store_id"]
@@ -187,6 +265,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_listings: {
         Row: {
           created_at: string
@@ -222,29 +341,47 @@ export type Database = {
       }
       store_requests: {
         Row: {
+          business_name: string | null
+          business_reg_number: string | null
+          category: string | null
+          contact: string | null
           created_at: string
           description: string
+          document_url: string | null
           id: string
           logo_url: string | null
           name: string
+          review_reason: string | null
           status: Database["public"]["Enums"]["request_status"]
           user_id: string
         }
         Insert: {
+          business_name?: string | null
+          business_reg_number?: string | null
+          category?: string | null
+          contact?: string | null
           created_at?: string
           description?: string
+          document_url?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          review_reason?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           user_id: string
         }
         Update: {
+          business_name?: string | null
+          business_reg_number?: string | null
+          category?: string | null
+          contact?: string | null
           created_at?: string
           description?: string
+          document_url?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          review_reason?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           user_id?: string
         }
@@ -260,6 +397,9 @@ export type Database = {
       }
       stores: {
         Row: {
+          business_name: string | null
+          business_reg_number: string | null
+          category: string | null
           created_at: string
           description: string
           id: string
@@ -267,8 +407,12 @@ export type Database = {
           name: string
           owner_id: string
           status: Database["public"]["Enums"]["store_status"]
+          verified: boolean
         }
         Insert: {
+          business_name?: string | null
+          business_reg_number?: string | null
+          category?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -276,8 +420,12 @@ export type Database = {
           name: string
           owner_id: string
           status?: Database["public"]["Enums"]["store_status"]
+          verified?: boolean
         }
         Update: {
+          business_name?: string | null
+          business_reg_number?: string | null
+          category?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -285,6 +433,7 @@ export type Database = {
           name?: string
           owner_id?: string
           status?: Database["public"]["Enums"]["store_status"]
+          verified?: boolean
         }
         Relationships: [
           {
@@ -346,9 +495,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      close_due_auctions: { Args: never; Returns: number }
+      finalize_auction: { Args: { p_listing_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
+      place_bid: {
+        Args: { p_amount: number; p_listing_id: string }
+        Returns: Json
+      }
     }
     Enums: {
+      auction_status: "scheduled" | "live" | "ended" | "cancelled"
       listing_category:
         | "electronics"
         | "furniture"
@@ -360,6 +516,7 @@ export type Database = {
         | "other"
       listing_status: "active" | "sold" | "deleted"
       request_status: "pending" | "approved" | "rejected"
+      sale_type: "fixed" | "auction"
       store_status: "active" | "inactive"
     }
     CompositeTypes: {
@@ -368,7 +525,7 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Database
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
@@ -488,6 +645,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      auction_status: ["scheduled", "live", "ended", "cancelled"],
       listing_category: [
         "electronics",
         "furniture",
@@ -500,6 +658,7 @@ export const Constants = {
       ],
       listing_status: ["active", "sold", "deleted"],
       request_status: ["pending", "approved", "rejected"],
+      sale_type: ["fixed", "auction"],
       store_status: ["active", "inactive"],
     },
   },

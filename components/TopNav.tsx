@@ -10,19 +10,14 @@ import { getAvatarUrl } from '@/lib/utils';
 import ListingFilters from '@/components/listing/ListingFilters';
 import NotificationBell from '@/components/NotificationBell';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { emailInAllowlist } from '@/lib/adminEmails';
 
 interface TopNavProps {
   user: UserProfile | null;
 }
 
 function isAdminEmail(email: string | null | undefined) {
-  const allowList = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-  if (!email) return false;
-  if (allowList.length === 0) return false;
-  return allowList.includes(email.trim().toLowerCase());
+  return emailInAllowlist(email, process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? process.env.NEXT_PUBLIC_ADMIN_EMAIL);
 }
 
 export default function TopNav({ user }: TopNavProps) {

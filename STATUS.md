@@ -103,6 +103,15 @@ Audited secrets handling, client/server boundaries, git history, and DB access c
 - `/api/translate` is an open authenticated-not-required proxy to DeepL — could burn quota if abused; consider rate-limiting/auth later (DeepL key is currently empty anyway).
 - Supabase advisor WARNs: leaked-password protection disabled (enable in Auth settings), public-bucket listing on `avatars`/`listings`, mutable search_path on pre-existing functions. None expose secrets.
 
+## Tech-debt cleanup (post-launch)
+
+- **`listings.languages` fixed.** Column was `text` holding JSON-stringified arrays, so `.contains()` never matched. Migration `0006_languages_to_array.sql` converts it to `text[]` (existing data migrated) + GIN index. The language filter now actually works.
+- **Types are now a single source of truth.** Regenerated `types/database.types.ts` from the live DB (includes all migration 0001–0006 columns/tables). Removed the manual column augmentations from `types/index.ts` — it now only adds *relational* fields (seller/store/owner/bidder/listingCount) and enum aliases (`SaleType`/`AuctionStatus` from generated `Enums`).
+- **DRY.** Extracted `emailInAllowlist()` (`lib/adminEmails.ts`) used by both server pages and TopNav; moved `USER_PUBLIC_COLS` to `lib/userColumns.ts` (no server imports) so the realtime hooks reference it instead of duplicating the column list.
+- **Perf.** `getStores` no longer does N+1 count queries — one `.in()` query tallied in memory.
+- **ESLint configured** (`.eslintrc.json`, `next/core-web-vitals`). `npm run lint` runs clean (one non-blocking exhaustive-deps warning in TopNav).
+- Still no automated tests (type-check via `next build` + lint are the gates).
+
 ## Flagged items / deferred
 
 - **DB migrations not auto-applied** — Supabase MCP is connected to a different account than the app's project (`izwshmdscanpidkxrniu`). Run `supabase/migrations/0001–0003` in that project's SQL editor (in order). Features depending on new columns/tables stay inert until then.

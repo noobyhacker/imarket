@@ -4,15 +4,8 @@ import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import TopNav from '@/components/TopNav';
 import { getCurrentUser } from '@/lib/queries';
+import { emailInAllowlist } from '@/lib/adminEmails';
 import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
-
-// Server-side admin check using NON-public env vars (never trust the client).
-function isAdminEmail(email: string | null | undefined) {
-  const allowList = (process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? '')
-    .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-  if (!email || allowList.length === 0) return false;
-  return allowList.includes(email.trim().toLowerCase());
-}
 
 export default async function AdminPage({
   searchParams,
@@ -23,7 +16,9 @@ export default async function AdminPage({
 
   // Gate access BEFORE touching the service-role client or any data.
   const currentUser = await getCurrentUser().catch(() => null);
-  if (!currentUser || (!currentUser.is_admin && !isAdminEmail(currentUser.email))) {
+  const allowed = currentUser
+    && (currentUser.is_admin || emailInAllowlist(currentUser.email, process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL));
+  if (!allowed) {
     redirect('/');
   }
 
