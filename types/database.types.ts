@@ -497,6 +497,7 @@ export type Database = {
       }
       users: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"]
           admin_role: Database["public"]["Enums"]["admin_role"] | null
           avatar_url: string | null
           badge: string | null
@@ -509,9 +510,12 @@ export type Database = {
           location: string | null
           nickname: string
           review_count: number
+          status_reason: string | null
+          suspended_until: string | null
           trust_score: number
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           badge?: string | null
@@ -524,9 +528,12 @@ export type Database = {
           location?: string | null
           nickname: string
           review_count?: number
+          status_reason?: string | null
+          suspended_until?: string | null
           trust_score?: number
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           badge?: string | null
@@ -539,6 +546,8 @@ export type Database = {
           location?: string | null
           nickname?: string
           review_count?: number
+          status_reason?: string | null
+          suspended_until?: string | null
           trust_score?: number
         }
         Relationships: []
@@ -548,6 +557,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_force_logout: { Args: { target: string }; Returns: undefined }
       can_moderate: { Args: never; Returns: boolean }
       close_due_auctions: { Args: never; Returns: number }
       current_admin_role: {
@@ -558,12 +568,14 @@ export type Database = {
       has_admin_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      is_user_active: { Args: { uid: string }; Returns: boolean }
       place_bid: {
         Args: { p_amount: number; p_listing_id: string }
         Returns: Json
       }
     }
     Enums: {
+      account_status: "active" | "suspended" | "banned"
       admin_role: "super_admin" | "moderator" | "support"
       auction_status: "scheduled" | "live" | "ended" | "cancelled"
       listing_category:
@@ -706,6 +718,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["active", "suspended", "banned"],
       admin_role: ["super_admin", "moderator", "support"],
       auction_status: ["scheduled", "live", "ended", "cancelled"],
       listing_category: [
