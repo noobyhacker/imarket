@@ -289,6 +289,26 @@
       "noKeywords": "Ключевых слов пока нет.",
       "noFlags": "Флагов пока нет."
     },
+    "announcements": {
+      "title": "Объявления",
+      "new": "Новое объявление",
+      "newTitle": "Новое объявление",
+      "editTitle": "Редактировать объявление",
+      "titleLabel": "Заголовок",
+      "bodyLabel": "Текст",
+      "countryCode": "Код страны (напр. KR)",
+      "startsAt": "Начало",
+      "endsAt": "Окончание",
+      "published": "Опубликовано",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "empty": "Объявлений пока нет.",
+      "publish": "Опубликовать",
+      "unpublish": "Снять с публикации",
+      "statusPublished": "Опубликовано",
+      "statusDraft": "Черновик",
+      "audience": { "all": "Все", "buyers": "Покупатели", "sellers": "Продавцы", "stores": "Магазины", "country": "По стране" }
+    },
     "nav": {
       "dashboard": "Сводка",
       "audit": "Журнал действий",

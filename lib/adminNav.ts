@@ -18,6 +18,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/auctions', key: 'auctions', min: 'support' },
   { href: '/admin/messages', key: 'messages', min: 'support' },
   { href: '/admin/users', key: 'users', min: 'support' },
+  { href: '/admin/announcements', key: 'announcements', min: 'moderator' },
   { href: '/admin/audit', key: 'audit', min: 'support' },
   { href: '/admin/settings', key: 'settings', min: 'super_admin' },
 ];

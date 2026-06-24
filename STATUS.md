@@ -196,4 +196,13 @@ Enforced by `assertRole(min)` (`lib/adminAuth.ts`, role rank support<moderator<s
 - **UI** (`/admin/settings`, super_admin-only — page-level role check): feature-flag toggles (incl. maintenance), banned-keyword management + rescan. Nav entry `min: 'super_admin'`.
 - **Deferred**: category-*enum* editing (kept migration-managed — see top); country-list governance can live in `platform_config` as a follow-up.
 - **Verification**: `npm run build` passes. SQL proof — adding the keyword "weapon" then creating a matching listing auto-created an `open` prohibited report.
+
+## Phase 10 — Announcements ✅
+- **Migration `0016_announcements.sql`**: `announcement_audience` enum + `announcements` table (multilingual `title`/`body` jsonb, audience, country_code, schedule window, published). RLS — public reads only currently-active published rows; `can_moderate()` reads all + writes.
+- **Backend**: `adminSaveAnnouncement`/`adminToggleAnnouncement`/`adminDeleteAnnouncement` (moderator+, audited).
+- **UI**: `/admin/announcements` (multilingual create/edit, audience + country + schedule + publish toggle); `components/AnnouncementBanner.tsx` (server) mounted in the root layout renders active announcements in the viewer's locale, filtered by audience (all/buyers everyone; sellers → has a listing; stores → owns a store; country → matches profile location). Nav entry added.
+- **Verification**: `npm run build` + `npm run lint` pass. SQL proof — anon sees only the published announcement, not the draft.
+
+## Permission matrix verification summary
+All destructive admin actions call `assertRole(min)` server-side and write to `admin_audit_log`; the log has only a SELECT policy (append-only). RLS simulations proved: support is read-only (can_moderate=false), suspended/banned users lose list/bid/message at the data layer, suspended-store and draft-announcement rows are hidden from the public, and the prohibited-keyword trigger auto-files reports.
 - **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).

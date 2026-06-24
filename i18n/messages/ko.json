@@ -289,6 +289,26 @@
       "noKeywords": "키워드가 없습니다.",
       "noFlags": "기능 플래그가 없습니다."
     },
+    "announcements": {
+      "title": "공지",
+      "new": "새 공지",
+      "newTitle": "새 공지",
+      "editTitle": "공지 수정",
+      "titleLabel": "제목",
+      "bodyLabel": "내용",
+      "countryCode": "국가 코드 (예: KR)",
+      "startsAt": "시작",
+      "endsAt": "종료",
+      "published": "게시됨",
+      "save": "저장",
+      "cancel": "취소",
+      "empty": "공지가 없습니다.",
+      "publish": "게시",
+      "unpublish": "게시 취소",
+      "statusPublished": "게시됨",
+      "statusDraft": "초안",
+      "audience": { "all": "전체", "buyers": "구매자", "sellers": "판매자", "stores": "상점", "country": "국가별" }
+    },
     "nav": {
       "dashboard": "대시보드",
       "audit": "감사 로그",

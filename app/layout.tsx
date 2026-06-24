@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { isMaintenanceMode } from '@/lib/featureFlags';
 import { getAdminContext } from '@/lib/adminAuth';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
@@ -34,7 +35,10 @@ export default async function RootLayout({
               <p className="max-w-md text-sm text-muted-foreground">{tm('body')}</p>
             </div>
           ) : (
-            children
+            <>
+              <AnnouncementBanner />
+              {children}
+            </>
           )}
         </NextIntlClientProvider>
       </body>

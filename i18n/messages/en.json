@@ -289,6 +289,26 @@
       "noKeywords": "No keywords yet.",
       "noFlags": "No feature flags."
     },
+    "announcements": {
+      "title": "Announcements",
+      "new": "New announcement",
+      "newTitle": "New announcement",
+      "editTitle": "Edit announcement",
+      "titleLabel": "Title",
+      "bodyLabel": "Body",
+      "countryCode": "Country code (e.g. KR)",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "published": "Published",
+      "save": "Save",
+      "cancel": "Cancel",
+      "empty": "No announcements yet.",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "audience": { "all": "Everyone", "buyers": "Buyers", "sellers": "Sellers", "stores": "Stores", "country": "By country" }
+    },
     "nav": {
       "dashboard": "Dashboard",
       "audit": "Audit Log",

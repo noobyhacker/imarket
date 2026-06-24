@@ -4,7 +4,7 @@ import { createAdminSupabaseClient, createServerSupabaseClient } from '@/lib/sup
 import { revalidatePath } from 'next/cache';
 import { assertRole, type AdminRole } from '@/lib/adminAuth';
 import { logAdminAction } from '@/lib/auditLog';
-import type { ListingCategory, ReportStatus, ReportReason } from '@/types';
+import type { ListingCategory, ReportStatus, ReportReason, AnnouncementAudience } from '@/types';
 
 export async function adminDeleteListing(id: string, reason?: string) {
   await assertRole('moderator');
@@ -482,4 +482,65 @@ export async function adminRescanProhibited(): Promise<number> {
   await logAdminAction({ action: 'config.rescan_prohibited', after: { flagged: data ?? 0 } });
   revalidatePath('/admin/moderation');
   return (data as number) ?? 0;
+}
+
+// ── Announcements (Phase 10) ────────────────────────────────────────────────
+
+export interface AnnouncementInput {
+  id?: string;
+  title: { en: string; ko: string; ru: string };
+  body: { en: string; ko: string; ru: string };
+  audience: AnnouncementAudience;
+  country_code?: string | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  published: boolean;
+}
+
+export async function adminSaveAnnouncement(input: AnnouncementInput) {
+  const ctx = await assertRole('moderator');
+  if (!input.title.en?.trim() && !input.title.ko?.trim() && !input.title.ru?.trim()) {
+    throw new Error('A title in at least one language is required');
+  }
+  const supabase = await createAdminSupabaseClient();
+  const row = {
+    title: input.title as never,
+    body: input.body as never,
+    audience: input.audience,
+    country_code: input.audience === 'country' ? (input.country_code || null) : null,
+    starts_at: input.starts_at || null,
+    ends_at: input.ends_at || null,
+    published: input.published,
+  };
+  if (input.id) {
+    const { error } = await supabase.from('announcements').update(row).eq('id', input.id);
+    if (error) throw error;
+    await logAdminAction({ action: 'announcement.update', targetType: 'announcement', targetId: input.id });
+  } else {
+    const { data, error } = await supabase.from('announcements').insert({ ...row, created_by: ctx.userId }).select('id').single();
+    if (error) throw error;
+    await logAdminAction({ action: 'announcement.create', targetType: 'announcement', targetId: data?.id });
+  }
+  revalidatePath('/admin/announcements');
+  revalidatePath('/', 'layout');
+}
+
+export async function adminToggleAnnouncement(id: string, published: boolean) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('announcements').update({ published }).eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: published ? 'announcement.publish' : 'announcement.unpublish', targetType: 'announcement', targetId: id });
+  revalidatePath('/admin/announcements');
+  revalidatePath('/', 'layout');
+}
+
+export async function adminDeleteAnnouncement(id: string) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('announcements').delete().eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: 'announcement.delete', targetType: 'announcement', targetId: id });
+  revalidatePath('/admin/announcements');
+  revalidatePath('/', 'layout');
 }

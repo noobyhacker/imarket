@@ -64,6 +64,45 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          audience: Database["public"]["Enums"]["announcement_audience"]
+          body: Json
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          published: boolean
+          starts_at: string | null
+          title: Json
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["announcement_audience"]
+          body?: Json
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          published?: boolean
+          starts_at?: string | null
+          title?: Json
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["announcement_audience"]
+          body?: Json
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          published?: boolean
+          starts_at?: string | null
+          title?: Json
+        }
+        Relationships: []
+      }
       banned_keywords: {
         Row: {
           category: Database["public"]["Enums"]["report_reason"]
@@ -715,6 +754,7 @@ export type Database = {
     Enums: {
       account_status: "active" | "suspended" | "banned"
       admin_role: "super_admin" | "moderator" | "support"
+      announcement_audience: "all" | "buyers" | "sellers" | "stores" | "country"
       auction_status: "scheduled" | "live" | "ended" | "cancelled"
       listing_category:
         | "electronics"
@@ -868,6 +908,7 @@ export const Constants = {
     Enums: {
       account_status: ["active", "suspended", "banned"],
       admin_role: ["super_admin", "moderator", "support"],
+      announcement_audience: ["all", "buyers", "sellers", "stores", "country"],
       auction_status: ["scheduled", "live", "ended", "cancelled"],
       listing_category: [
         "electronics",
