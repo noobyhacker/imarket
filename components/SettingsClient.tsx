@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { getAvatarUrl } from '@/lib/utils';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 import type { UserProfile } from '@/types';
 
 interface SettingsClientProps {
@@ -87,11 +88,17 @@ export default function SettingsClient({ user }: SettingsClientProps) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Language</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Preferred language (translations)</label>
           <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary">
             <option value="en">English</option>
             <option value="ko">한국어</option>
+            <option value="ru">Русский</option>
           </select>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Display language (interface)</label>
+          <LocaleSwitcher variant="inline" />
         </div>
 
         <button onClick={handleSave} disabled={saving || !nickname.trim()} className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-40">

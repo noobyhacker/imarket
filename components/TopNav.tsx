@@ -9,6 +9,7 @@ import type { UserProfile } from '@/types';
 import { getAvatarUrl } from '@/lib/utils';
 import ListingFilters from '@/components/listing/ListingFilters';
 import NotificationBell from '@/components/NotificationBell';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 
 interface TopNavProps {
   user: UserProfile | null;
@@ -188,6 +189,7 @@ export default function TopNav({ user }: TopNavProps) {
                       <button onClick={() => { router.push('/settings'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                         <Settings size={15} className="text-muted-foreground" /> Settings
                       </button>
+                      <LocaleSwitcher />
                       {(user.is_admin || isAdminEmail(user.email)) && (
                         <button onClick={() => { router.push('/admin'); setDropdownOpen(false); }} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary">
                           <ShieldCheck size={15} className="text-muted-foreground" /> {t('admin')}

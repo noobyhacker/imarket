@@ -66,8 +66,23 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 
 > **Manual verification only** (per spec): NTS 사업자등록번호 lookup API intentionally NOT integrated — future enhancement. A human reviews the certificate against the submitted name + number.
 
+## i18n — Russian locale (DONE)
+
+- `i18n/messages/ru.json` — full Russian translation mirroring `en.json`/`ko.json` (kept in sync).
+- `'ru'` registered in `i18n/config.ts` locales.
+- `components/LocaleSwitcher.tsx` — sets `NEXT_LOCALE` cookie + `router.refresh()`; added to TopNav dropdown (menu) and Settings (inline). Settings also gains a `ru` content-language option.
+
+## Final verification
+
+- `npm run build` — passes (TypeScript type-check clean) for all routes incl. `/auctions`, `/stores`, `/stores/apply`, `/stores/[id]`, `/api/cron/close-auctions`.
+- `npm run lint` — **ESLint is not configured** in this project (next lint prompts to set it up interactively); left as-is rather than introducing a config mid-build. Type-checking via `next build` covers correctness.
+- All new views built mobile-first (max-w-lg / responsive grids), usable at 375px.
+
 ## Flagged items / deferred
 
+- **DB migrations not auto-applied** — Supabase MCP is connected to a different account than the app's project (`izwshmdscanpidkxrniu`). Run `supabase/migrations/0001–0003` in that project's SQL editor (in order). Features depending on new columns/tables stay inert until then.
 - **NTS 사업자등록번호 lookup API** — deferred per spec; manual review only (format+checksum validation built).
 - **Facet result counts** — existing filter UI shows no per-facet counts; new country filter matches that (no counts).
-- **Russian i18n** — added as full locale in the i18n phase.
+- **Vercel cron cadence** — `vercel.json` uses every-minute (`* * * * *`), requires Pro; switch to daily on Hobby (lazy close-on-read still covers UX).
+- **New env var** — `CRON_SECRET` for `/api/cron/close-auctions`.
+- **ESLint** — not configured (pre-existing).

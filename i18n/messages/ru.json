@@ -1,0 +1,210 @@
+{
+  "nav": {
+    "home": "Главная",
+    "sell": "Продать",
+    "auctions": "Аукционы",
+    "chat": "Чат",
+    "profile": "Моё",
+    "login": "Войти",
+    "signup": "Регистрация",
+    "logout": "Выйти",
+    "myStore": "Мой магазин",
+    "admin": "Админ"
+  },
+  "listings": {
+    "empty": "Пока нет объявлений",
+    "search": "Поиск товаров рядом...",
+    "filterNearby": "Рядом",
+    "filterEnglish": "Говорят по-английски",
+    "filterRecent": "Недавние",
+    "sortNewest": "Сначала новые",
+    "sortPriceLow": "Цена: по возрастанию",
+    "sortPriceHigh": "Цена: по убыванию",
+    "category": "Категория",
+    "location": "Местоположение",
+    "allCategories": "Все категории",
+    "chatWithSeller": "Написать продавцу",
+    "englishFriendly": "Говорят по-английски",
+    "foreignerSafe": "Безопасно для иностранцев",
+    "postedBy": "Опубликовал",
+    "relatedListings": "Ещё от этого продавца",
+    "activeListings": "Активные",
+    "soldListings": "Проданные"
+  },
+  "categories": {
+    "electronics": "Электроника",
+    "furniture": "Мебель",
+    "clothing": "Одежда",
+    "vehicles": "Транспорт",
+    "home_appliances": "Бытовая техника",
+    "books": "Книги",
+    "services": "Услуги",
+    "other": "Другое"
+  },
+  "create": {
+    "title": "Разместить объявление",
+    "titleLabel": "Название",
+    "titlePlaceholder": "Что вы продаёте?",
+    "descriptionLabel": "Описание",
+    "descriptionPlaceholder": "Опишите товар, состояние и как встретиться...",
+    "priceLabel": "Цена (₩)",
+    "pricePlaceholder": "0",
+    "categoryLabel": "Категория",
+    "categoryPlaceholder": "Выберите категорию",
+    "locationLabel": "Местоположение",
+    "locationPlaceholder": "напр. Хондэ, Сеул",
+    "addPhotos": "Добавить фото",
+    "postButton": "Опубликовать",
+    "posting": "Публикация...",
+    "successTitle": "Объявление опубликовано!",
+    "successMessage": "Ваше объявление теперь активно."
+  },
+  "chat": {
+    "title": "Сообщения",
+    "empty": "Пока нет переписок",
+    "start": "Написать продавцу",
+    "send": "Отправить",
+    "placeholder": "Введите сообщение...",
+    "activeNow": "В сети",
+    "typing": "Печатает...",
+    "seen": "Прочитано"
+  },
+  "translation": {
+    "showOriginal": "Показать оригинал",
+    "showTranslated": "Показать перевод",
+    "originalLanguage": "Оригинал",
+    "pending": "Перевод...",
+    "autoTranslateOn": "Автоперевод ВКЛ",
+    "translate": "Перевести"
+  },
+  "profile": {
+    "title": "Мой профиль",
+    "listings": "Объявления",
+    "reviews": "Отзывы",
+    "trustScore": "Рейтинг доверия",
+    "active": "Активные",
+    "sold": "Проданные",
+    "noListings": "Пока нет объявлений",
+    "joinedDate": "Регистрация",
+    "editProfile": "Редактировать профиль",
+    "myStore": "Мой магазин",
+    "requestStore": "Открыть магазин"
+  },
+  "store": {
+    "empty": "В этом магазине нет объявлений",
+    "requestTitle": "Открыть магазин",
+    "requestName": "Название магазина",
+    "requestDescription": "Описание",
+    "requestLogo": "Логотип",
+    "requestButton": "Отправить заявку",
+    "pendingMessage": "Ваша заявка на магазин на рассмотрении.",
+    "rejectedMessage": "Ваша заявка на магазин отклонена."
+  },
+  "admin": {
+    "title": "Панель администратора",
+    "listings": "Объявления",
+    "storeRequests": "Заявки магазинов",
+    "users": "Пользователи",
+    "chats": "Чаты",
+    "approve": "Одобрить",
+    "reject": "Отклонить",
+    "delete": "Удалить",
+    "confirmDelete": "Вы уверены, что хотите удалить это объявление?",
+    "confirmDeleteButton": "Удалить",
+    "cancelButton": "Отмена",
+    "status": "Статус",
+    "pending": "На рассмотрении",
+    "approved": "Одобрено",
+    "rejected": "Отклонено",
+    "active": "Активно",
+    "sold": "Продано",
+    "user": "Пользователь",
+    "email": "Эл. почта",
+    "joinedDate": "Регистрация",
+    "noData": "Нет данных"
+  },
+  "auth": {
+    "loginTitle": "С возвращением",
+    "loginSubtitle": "Войдите в свой аккаунт iMarket",
+    "signupTitle": "Присоединяйтесь к iMarket",
+    "signupSubtitle": "Создайте аккаунт, чтобы покупать и продавать",
+    "emailLabel": "Эл. почта",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Пароль",
+    "passwordPlaceholder": "Ваш пароль",
+    "nicknameLabel": "Никнейм",
+    "nicknamePlaceholder": "Отображаемое имя",
+    "loginButton": "Войти",
+    "signupButton": "Создать аккаунт",
+    "loginLoading": "Вход...",
+    "signupLoading": "Создание аккаунта...",
+    "noAccount": "Нет аккаунта?",
+    "hasAccount": "Уже есть аккаунт?",
+    "signupLink": "Зарегистрироваться",
+    "loginLink": "Войти"
+  },
+  "errors": {
+    "connection": "Ошибка соединения. Попробуйте снова.",
+    "notFound": "Не найдено",
+    "notFoundMessage": "Такой страницы не существует.",
+    "imageSize": "Изображение должно быть меньше 5 МБ",
+    "imageType": "Разрешены только изображения JPG, PNG и WEBP",
+    "sessionExpired": "Сессия истекла. Войдите снова.",
+    "unauthorized": "У вас нет прав для этого действия."
+  },
+  "validation": {
+    "title": {
+      "min": "Название должно содержать не менее 2 символов",
+      "max": "Название должно быть короче 100 символов",
+      "required": "Название обязательно"
+    },
+    "description": {
+      "min": "Описание должно содержать не менее 10 символов",
+      "required": "Описание обязательно"
+    },
+    "price": {
+      "positive": "Цена должна быть больше 0",
+      "required": "Цена обязательна"
+    },
+    "category": {
+      "required": "Выберите категорию"
+    },
+    "location": {
+      "required": "Местоположение обязательно"
+    },
+    "email": {
+      "invalid": "Введите корректный адрес эл. почты",
+      "required": "Эл. почта обязательна"
+    },
+    "password": {
+      "min": "Пароль должен содержать не менее 6 символов",
+      "required": "Пароль обязателен"
+    },
+    "nickname": {
+      "min": "Никнейм должен содержать не менее 2 символов",
+      "required": "Никнейм обязателен"
+    }
+  },
+  "time": {
+    "justNow": "Только что",
+    "minutesAgo": "{count} мин назад",
+    "hoursAgo": "{count} час назад",
+    "hoursAgoPlural": "{count} ч назад",
+    "yesterday": "Вчера",
+    "daysAgo": "{count} дн назад"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "back": "Назад",
+    "submit": "Отправить",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "sort": "Сортировка",
+    "close": "Закрыть",
+    "won": "₩"
+  }
+}
