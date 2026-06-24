@@ -37,6 +37,8 @@ export default function ListingDetailClient({
   const [listingStatus, setListingStatus] = useState(listing.status);
   const [toggling, setToggling] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const isSeller = currentUser?.id === listing.user_id;
 
@@ -49,9 +51,16 @@ export default function ListingDetailClient({
   };
 
   const handleDelete = async () => {
-    await deleteOwnListing(listing.id);
-    router.push('/');
-    router.refresh();
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await deleteOwnListing(listing.id);
+      router.push('/');
+      router.refresh();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete listing.');
+      setDeleting(false);
+    }
   };
 
   const images = listing.images?.length
@@ -354,18 +363,23 @@ export default function ListingDetailClient({
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-elevated">
             <p className="text-sm font-bold text-foreground">Delete this listing?</p>
             <p className="mt-1 text-xs text-muted-foreground">This cannot be undone. Active chats about this item will remain.</p>
+            {deleteError && (
+              <p className="mt-3 text-xs font-medium text-destructive">{deleteError}</p>
+            )}
             <div className="mt-5 flex gap-3">
               <button
-                onClick={() => setConfirmDelete(false)}
-                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground"
+                onClick={() => { setConfirmDelete(false); setDeleteError(''); }}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground disabled:opacity-40"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-40"
               >
-                Delete
+                {deleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

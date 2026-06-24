@@ -1,6 +1,6 @@
 'use server';
 
-import { createAdminSupabaseClient } from '@/lib/supabaseServer';
+import { createAdminSupabaseClient, createServerSupabaseClient } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
 
 function parseEmailList(value: string | undefined): string[] {
@@ -11,7 +11,11 @@ function parseEmailList(value: string | undefined): string[] {
 }
 
 async function assertAdmin() {
-  const supabase = await createAdminSupabaseClient();
+  // Identity must come from the cookie-based session client, NOT the
+  // service-role client. The service-role client authenticates as the
+  // service_role key, so auth.getUser() does not reliably resolve the
+  // caller's session and assertAdmin would throw Unauthorized.
+  const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   const allowList = [
     ...parseEmailList(process.env.ADMIN_EMAIL),

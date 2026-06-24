@@ -49,6 +49,8 @@ export default function AdminDashboard({
   const [rejectReason, setRejectReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
   const [docLoading, setDocLoading] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const buildAdminUrl = (params: { tab?: string; page?: number; q?: string }) => {
     const nextTab = params.tab ?? currentTab;
@@ -66,9 +68,17 @@ export default function AdminDashboard({
   const runSearch = () => router.push(buildAdminUrl({ page: 0, q: search }));
 
   const handleDeleteListing = async (id: string) => {
-    await adminDeleteListing(id);
-    setListings((prev) => prev.filter((l) => l.id !== id));
-    setConfirmDelete(null);
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await adminDeleteListing(id);
+      setListings((prev) => prev.filter((l) => l.id !== id));
+      setConfirmDelete(null);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete listing.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleApprove = async (id: string) => {
@@ -418,16 +428,21 @@ export default function AdminDashboard({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-card p-6 shadow-elevated">
             <p className="text-sm font-semibold text-foreground">{t('confirmDelete')}</p>
+            {deleteError && (
+              <p className="mt-3 text-xs font-medium text-destructive">{deleteError}</p>
+            )}
             <div className="mt-4 flex gap-3">
               <button
-                onClick={() => setConfirmDelete(null)}
-                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground"
+                onClick={() => { setConfirmDelete(null); setDeleteError(''); }}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground disabled:opacity-40"
               >
                 {t('cancelButton')}
               </button>
               <button
                 onClick={() => handleDeleteListing(confirmDelete)}
-                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-40"
               >
                 {t('confirmDeleteButton')}
               </button>
