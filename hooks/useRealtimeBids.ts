@@ -24,13 +24,13 @@ export function useRealtimeBids(listingId: string, initialBids: Bid[]) {
           const newBid = payload.new as Bid;
           const { data: bidder } = await supabase
             .from('users')
-            .select('*')
+            .select('id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language')
             .eq('id', newBid.bidder_id)
             .single();
 
           setBids((prev) => {
             if (prev.find((b) => b.id === newBid.id)) return prev;
-            return [{ ...newBid, bidder: bidder ?? undefined }, ...prev];
+            return [{ ...newBid, bidder: (bidder ?? undefined) as Bid['bidder'] }, ...prev];
           });
         }
       )

@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
@@ -5,14 +6,28 @@ import TopNav from '@/components/TopNav';
 import { getCurrentUser } from '@/lib/queries';
 import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
+// Server-side admin check using NON-public env vars (never trust the client).
+function isAdminEmail(email: string | null | undefined) {
+  const allowList = (process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? '')
+    .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (!email || allowList.length === 0) return false;
+  return allowList.includes(email.trim().toLowerCase());
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
   searchParams: { tab?: string; page?: string; q?: string };
 }) {
   const t = await getTranslations('admin');
-  const supabase = await createAdminSupabaseClient();
+
+  // Gate access BEFORE touching the service-role client or any data.
   const currentUser = await getCurrentUser().catch(() => null);
+  if (!currentUser || (!currentUser.is_admin && !isAdminEmail(currentUser.email))) {
+    redirect('/');
+  }
+
+  const supabase = await createAdminSupabaseClient();
   const tab = searchParams.tab ?? 'listings';
   const page = parseInt(searchParams.page ?? '0');
   const q = searchParams.q?.trim() ?? '';

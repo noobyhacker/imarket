@@ -84,6 +84,25 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 - **Navbar on chat** — `/chat` had no `TopNav` on desktop (custom header + `sm:hidden` BottomNav), stranding users. Added `TopNav` to the chat list page; chat detail keeps its back button (→ `/chat`, which now has full nav).
 - **Loading speed** — `getListings`/`getAuctions` did N+1 seller lookups (one query per user); replaced with a single batched `getUserProfilesByIds` `.in()` query.
 
+## Security review (secrets / data exposure)
+
+Audited secrets handling, client/server boundaries, git history, and DB access controls.
+
+**Clean:**
+- `.env.local` is gitignored and was never committed; only `.env.example` (empty placeholders) is tracked. No secrets anywhere in git history.
+- No hardcoded keys/JWTs in source. Service-role/admin client (`createAdminSupabaseClient`) is imported only by server code (route handlers, server components, server actions) — never by a `'use client'` component. All action files carry `'use server'`.
+- Browser-exposed env is limited to `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (anon key is designed to be public; protected by RLS) and `NEXT_PUBLIC_ADMIN_EMAIL(S)` (admin email used only to toggle the Admin menu — authorization is enforced server-side, not by this value).
+- RLS enabled on all 9 public tables. `messages`/`conversations` SELECT restricted to participants; INSERT policies bind `auth.uid()` to sender/buyer/bidder (no spoofing). Image upload route requires auth, validates type/size, scopes to the user's own folder.
+
+**Fixed during this review:**
+- **CRITICAL — `/admin` had no access control.** It fetched all users' emails + every conversation via the service-role client (RLS-bypassing) and rendered them, with `getCurrentUser()` fetched but never checked. Any visitor could load the full admin dashboard. Added a server-side admin gate (`is_admin` flag or non-public `ADMIN_EMAILS`) that `redirect('/')`s before any data access.
+- **HIGH — user emails were world-readable.** The `users` SELECT policy is public (intended for profiles) but the row included `email`, so anyone with the public anon key could scrape all emails via the REST API. Migration `0005_protect_user_email.sql` revokes table-level SELECT for anon/authenticated and re-grants SELECT on all columns *except* `email`. Owner's own email now comes from the auth session (`getCurrentUser`); admin uses the service role. All public user reads (queries, chat/bid embeds, realtime hooks) switched to an explicit non-email column set (`USER_PUBLIC_COLS`). Verified: `has_column_privilege(anon/authenticated,'email')` = false.
+
+**Residual (low / pre-existing, not blocking):**
+- Logged-in users can still read other users' emails is **no longer possible** (revoked for `authenticated` too). 
+- `/api/translate` is an open authenticated-not-required proxy to DeepL — could burn quota if abused; consider rate-limiting/auth later (DeepL key is currently empty anyway).
+- Supabase advisor WARNs: leaked-password protection disabled (enable in Auth settings), public-bucket listing on `avatars`/`listings`, mutable search_path on pre-existing functions. None expose secrets.
+
 ## Flagged items / deferred
 
 - **DB migrations not auto-applied** — Supabase MCP is connected to a different account than the app's project (`izwshmdscanpidkxrniu`). Run `supabase/migrations/0001–0003` in that project's SQL editor (in order). Features depending on new columns/tables stay inert until then.

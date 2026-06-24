@@ -1,17 +1,25 @@
 import { createServerSupabaseClient } from './supabaseServer';
 import type { Bid, Listing, ListingCategory, SortOption, Store, StoreRequest, UserProfile } from '@/types';
 
+// Public profile columns — deliberately EXCLUDES `email`. Email is only ever
+// read for the current user (sourced from the auth session, see getCurrentUser)
+// or by the admin service-role client. The `email` column is revoked from the
+// anon/authenticated roles at the DB level (migration 0005), so never select it
+// in client/anon-context reads.
+export const USER_PUBLIC_COLS =
+  'id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language';
+
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
   const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase
     .from('users')
-    .select('*')
+    .select(USER_PUBLIC_COLS)
     .eq('id', id)
     .single();
 
   if (error) return null;
-  return data as UserProfile;
+  return data as unknown as UserProfile;
 }
 
 /** Batch-fetch seller profiles in a single query (avoids N+1). */
@@ -19,8 +27,8 @@ async function getUserProfilesByIds(ids: string[]): Promise<Map<string, UserProf
   const unique = [...new Set(ids.filter(Boolean))];
   if (unique.length === 0) return new Map();
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase.from('users').select('*').in('id', unique);
-  return new Map(((data ?? []) as UserProfile[]).map((u) => [u.id, u]));
+  const { data } = await supabase.from('users').select(USER_PUBLIC_COLS).in('id', unique);
+  return new Map(((data ?? []) as unknown as UserProfile[]).map((u) => [u.id, u]));
 }
 
 export async function getListings({
@@ -158,7 +166,7 @@ export async function getBids(listingId: string): Promise<Bid[]> {
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('bids')
-    .select('*, bidder:users(*)')
+    .select(`*, bidder:users(${USER_PUBLIC_COLS})`)
     .eq('listing_id', listingId)
     .order('amount', { ascending: false });
   if (error) return [];
@@ -265,7 +273,11 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
   if (!user) return null;
 
-  return getUserProfile(user.id);
+  // email is sourced from the auth session, not the users table (which has the
+  // email column revoked from anon/authenticated).
+  const profile = await getUserProfile(user.id);
+  if (!profile) return null;
+  return { ...profile, email: user.email ?? '' } as UserProfile;
 }
 
 export async function getIsListingSaved(userId: string, listingId: string): Promise<boolean> {

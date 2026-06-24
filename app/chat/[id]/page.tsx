@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
-import { getCurrentUser } from '@/lib/queries';
+import { getCurrentUser, USER_PUBLIC_COLS } from '@/lib/queries';
 import ChatDetailClient from '@/components/chat/ChatDetailClient';
 import type { Conversation, Message } from '@/types';
 
@@ -21,8 +21,8 @@ export default async function ChatDetailPage({ params }: ChatDetailPageProps) {
     .select(`
       *,
       listing:listings(id, title_original, title_translated, images, price),
-      buyer:users!conversations_buyer_id_fkey(*),
-      seller:users!conversations_seller_id_fkey(*)
+      buyer:users!conversations_buyer_id_fkey(${USER_PUBLIC_COLS}),
+      seller:users!conversations_seller_id_fkey(${USER_PUBLIC_COLS})
     `)
     .eq('id', params.id)
     .single();
@@ -37,7 +37,7 @@ export default async function ChatDetailPage({ params }: ChatDetailPageProps) {
 
   const { data: messagesData } = await supabase
     .from('messages')
-    .select('*, sender:users(*)')
+    .select(`*, sender:users(${USER_PUBLIC_COLS})`)
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true });
 

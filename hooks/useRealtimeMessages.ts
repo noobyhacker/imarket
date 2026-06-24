@@ -28,14 +28,14 @@ export function useRealtimeMessages(
           // Fetch sender profile
           const { data: sender } = await supabase
             .from('users')
-            .select('*')
+            .select('id, nickname, avatar_url, trust_score, review_count, badge, languages, location, created_at, is_admin, language')
             .eq('id', newMsg.sender_id)
             .single();
 
           setMessages((prev) => {
             // Avoid duplicates (optimistic insert already added it)
             if (prev.find((m) => m.id === newMsg.id)) return prev;
-            return [...prev, { ...newMsg, sender: sender ?? undefined }];
+            return [...prev, { ...newMsg, sender: (sender ?? undefined) as Message['sender'] }];
           });
         }
       )

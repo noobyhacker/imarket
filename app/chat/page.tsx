@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
-import { getCurrentUser } from '@/lib/queries';
+import { getCurrentUser, USER_PUBLIC_COLS } from '@/lib/queries';
 import ChatListClient from '@/components/chat/ChatListClient';
 import BottomNav from '@/components/BottomNav';
 import TopNav from '@/components/TopNav';
@@ -18,8 +18,8 @@ export default async function ChatPage() {
     .select(`
       *,
       listing:listings(id, title_original, title_translated, images, price),
-      buyer:users!conversations_buyer_id_fkey(*),
-      seller:users!conversations_seller_id_fkey(*)
+      buyer:users!conversations_buyer_id_fkey(${USER_PUBLIC_COLS}),
+      seller:users!conversations_seller_id_fkey(${USER_PUBLIC_COLS})
     `)
     .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
     .order('last_message_at', { ascending: false });
