@@ -121,4 +121,36 @@ Audited secrets handling, client/server boundaries, git history, and DB access c
 - **New env var** — `CRON_SECRET` for `/api/cron/close-auctions`.
 - **ESLint** — not configured (pre-existing).
 - **`listings.languages` type mismatch (pre-existing bug, found during this build)** — the live DB column is `text` (single string), but the app inserts an array and filters with `.contains('languages', [...])`, and `types/database.types.ts` declares it `string[]`. Regenerating types from the live DB would type it `string | null` and break the build, so the generated types were **not** adopted wholesale; manual augmentations in `types/index.ts` remain the source for new columns. Fixing this properly means migrating the column to `text[]` (and backfilling) OR changing the code to treat languages as a single value — out of scope for these four phases; flagged for follow-up.
+
+---
+
+# Admin & Moderation Back-Office Build
+
+Production admin/moderation layer. Branch per phase (`admin-N-*`); migrations `0008`+ applied to live project `izwshmdscanpidkxrniu` via Supabase MCP.
+
+## Scope decisions (confirmed with operator)
+- Build **all phases except Orders/Transactions/Disputes** — no payment/orders system exists, so there is nothing to administer (deferred).
+- Build a **minimal reports system** (table + user "Report" controls) so the moderation queue has real data.
+- RBAC seeded as **is_admin → super_admin**; `ADMIN_EMAILS` env retained as an emergency super-admin bootstrap.
+- **Category/subcategory enum editing from the UI is deferred** — `listing_category` is a Postgres enum hardcoded across the app + i18n; governance is handled via the prohibited-keyword list (Phase 9). Adding/removing core categories stays a migration.
+
+## Phase 0 — Discovery (admin)
+- **Systems present** (full admin surfaces built): users, listings, auctions (`listings` auction cols + `bids`), stores + `store_requests`, chat (`conversations`/`messages`), `notifications`.
+- **Absent**: reports (building minimal), orders/payments/disputes (deferred), audit log (built), feature-flags/config/banned-keywords (Phase 9), announcements (Phase 10).
+- **Prior role model**: binary `users.is_admin` + `ADMIN_EMAILS` env + `is_admin()` SQL fn.
+
+## Permission matrix (as implemented)
+| Capability | super_admin | moderator | support |
+|---|---|---|---|
+| View dashboards / queues / audit log | ✓ | ✓ | ✓ (read-only) |
+| Moderate listings / stores / auctions / messages, suspend users | ✓ | ✓ | ✗ |
+| Assign roles, hard delete, platform config | ✓ | ✗ | ✗ |
+
+Enforced by `assertRole(min)` (`lib/adminAuth.ts`, role rank support<moderator<super_admin) at the top of every admin action, plus the `app/admin/layout.tsx` segment gate and RLS role helpers (`has_admin_access`/`can_moderate`/`is_super_admin`).
+
+## Phase 1 — Access, RBAC & Audit Log ✅
+- **Migration `0008_admin_rbac_audit.sql`**: `admin_role` enum + `users.admin_role` column (bootstrapped from `is_admin`); SECURITY DEFINER helpers `current_admin_role`/`has_admin_access`/`can_moderate`/`is_super_admin`; `is_admin()` redefined to honor either source (existing RLS unaffected). `admin_audit_log` table with **SELECT-only** RLS (no INSERT/UPDATE/DELETE policies → append-only, immutable from any user client; only the service-role `logAdminAction()` writes).
+- **Backend**: `lib/adminAuth.ts` (`getAdminContext` via the session client + env bootstrap, `assertRole`), `lib/auditLog.ts` (`logAdminAction`, captures actor + IP). `lib/adminActions.ts` refactored to `assertRole('moderator')` + audit logging on every mutation.
+- **UI**: `app/admin/layout.tsx` segment-wide gate + role-aware sidebar (`components/admin/AdminNav.tsx`, `lib/adminNav.ts`); `app/admin/audit/page.tsx` + `components/admin/AuditLogTable.tsx` (filter by actor/action/target/date; read-only). `app/admin/page.tsx` slimmed (gate/TopNav moved to layout). i18n strings in en/ko/ru.
+- **Verification**: `npm run build` + `npm run lint` pass. SQL RLS proof — non-admin: 0 audit rows + `has_admin_access=false`; super_admin: visible + `can_moderate=true`; support: `has_admin_access=true` but `can_moderate=false` & `is_super_admin=false`; audit log has only a SELECT policy.
 - **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).

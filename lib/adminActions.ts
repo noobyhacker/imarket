@@ -1,47 +1,25 @@
 'use server';
 
-import { createAdminSupabaseClient, createServerSupabaseClient } from '@/lib/supabaseServer';
+import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
+import { assertRole } from '@/lib/adminAuth';
+import { logAdminAction } from '@/lib/auditLog';
 
-function parseEmailList(value: string | undefined): string[] {
-  return (value ?? '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-async function assertAdmin() {
-  // Identity must come from the cookie-based session client, NOT the
-  // service-role client. The service-role client authenticates as the
-  // service_role key, so auth.getUser() does not reliably resolve the
-  // caller's session and assertAdmin would throw Unauthorized.
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const allowList = [
-    ...parseEmailList(process.env.ADMIN_EMAIL),
-    ...parseEmailList(process.env.ADMIN_EMAILS),
-    ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAIL),
-    ...parseEmailList(process.env.NEXT_PUBLIC_ADMIN_EMAILS),
-  ];
-  const email = user?.email?.trim().toLowerCase();
-  if (!email || allowList.length === 0 || !allowList.includes(email)) {
-    throw new Error('Unauthorized');
-  }
-}
-
-export async function adminDeleteListing(id: string) {
-  await assertAdmin();
+export async function adminDeleteListing(id: string, reason?: string) {
+  await assertRole('moderator');
   const supabase = await createAdminSupabaseClient();
   const { error } = await supabase
     .from('listings')
     .update({ status: 'deleted' })
     .eq('id', id);
   if (error) throw error;
+  await logAdminAction({ action: 'listing.remove', targetType: 'listing', targetId: id, reason });
   revalidatePath('/admin');
+  revalidatePath('/');
 }
 
 export async function adminApproveStoreRequest(requestId: string) {
-  await assertAdmin();
+  await assertRole('moderator');
   const supabase = await createAdminSupabaseClient();
 
   // Fetch request details
@@ -81,11 +59,17 @@ export async function adminApproveStoreRequest(requestId: string) {
     link: '/create',
   });
 
+  await logAdminAction({
+    action: 'store.approve',
+    targetType: 'store_request',
+    targetId: requestId,
+    after: { business_name: req.business_name ?? req.name },
+  });
   revalidatePath('/admin');
 }
 
 export async function adminRejectStoreRequest(requestId: string, reason: string) {
-  await assertAdmin();
+  await assertRole('moderator');
   if (!reason || !reason.trim()) throw new Error('A rejection reason is required');
   const supabase = await createAdminSupabaseClient();
 
@@ -111,12 +95,18 @@ export async function adminRejectStoreRequest(requestId: string, reason: string)
     });
   }
 
+  await logAdminAction({
+    action: 'store.reject',
+    targetType: 'store_request',
+    targetId: requestId,
+    reason: reason.trim(),
+  });
   revalidatePath('/admin');
 }
 
 /** Admin-only signed URL for a business document (private bucket). */
 export async function adminGetStoreDocUrl(path: string): Promise<string | null> {
-  await assertAdmin();
+  await assertRole('moderator');
   const supabase = await createAdminSupabaseClient();
   const { data } = await supabase.storage.from('store-docs').createSignedUrl(path, 120);
   return data?.signedUrl ?? null;

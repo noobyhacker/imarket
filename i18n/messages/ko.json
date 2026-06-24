@@ -121,7 +121,35 @@
     "user": "사용자",
     "email": "이메일",
     "joinedDate": "가입일",
-    "noData": "데이터 없음"
+    "noData": "데이터 없음",
+    "nav": {
+      "dashboard": "대시보드",
+      "audit": "감사 로그",
+      "users": "사용자",
+      "moderation": "신고 관리",
+      "stores": "상점",
+      "auctions": "경매",
+      "messages": "메시지",
+      "announcements": "공지",
+      "settings": "설정"
+    },
+    "audit": {
+      "title": "감사 로그",
+      "subtitle": "모든 관리자 작업의 추가 전용 기록입니다. 읽기 전용.",
+      "filterActor": "작업자 이메일…",
+      "filterAction": "작업…",
+      "allTargets": "모든 대상",
+      "apply": "적용",
+      "colWhen": "시간",
+      "colActor": "작업자",
+      "colAction": "작업",
+      "colTarget": "대상",
+      "colReason": "사유",
+      "empty": "조건에 맞는 감사 기록이 없습니다.",
+      "countLabel": "{count}개 항목",
+      "prev": "이전",
+      "next": "다음"
+    }
   },
   "auth": {
     "loginTitle": "다시 오신 것을 환영합니다",

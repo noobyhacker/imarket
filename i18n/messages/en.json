@@ -121,7 +121,35 @@
     "user": "User",
     "email": "Email",
     "joinedDate": "Joined",
-    "noData": "No data"
+    "noData": "No data",
+    "nav": {
+      "dashboard": "Dashboard",
+      "audit": "Audit Log",
+      "users": "Users",
+      "moderation": "Moderation",
+      "stores": "Stores",
+      "auctions": "Auctions",
+      "messages": "Messages",
+      "announcements": "Announcements",
+      "settings": "Settings"
+    },
+    "audit": {
+      "title": "Audit Log",
+      "subtitle": "Append-only record of every admin action. Read-only.",
+      "filterActor": "Actor email…",
+      "filterAction": "Action…",
+      "allTargets": "All targets",
+      "apply": "Apply",
+      "colWhen": "When",
+      "colActor": "Actor",
+      "colAction": "Action",
+      "colTarget": "Target",
+      "colReason": "Reason",
+      "empty": "No audit entries match these filters.",
+      "countLabel": "{count} entries",
+      "prev": "Previous",
+      "next": "Next"
+    }
   },
   "auth": {
     "loginTitle": "Welcome back",

@@ -1,26 +1,15 @@
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
-import TopNav from '@/components/TopNav';
-import { getCurrentUser } from '@/lib/queries';
-import { emailInAllowlist } from '@/lib/adminEmails';
 import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
+// Access is enforced by app/admin/layout.tsx (segment-wide gate).
 export default async function AdminPage({
   searchParams,
 }: {
   searchParams: { tab?: string; page?: string; q?: string };
 }) {
   const t = await getTranslations('admin');
-
-  // Gate access BEFORE touching the service-role client or any data.
-  const currentUser = await getCurrentUser().catch(() => null);
-  const allowed = currentUser
-    && (currentUser.is_admin || emailInAllowlist(currentUser.email, process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL));
-  if (!allowed) {
-    redirect('/');
-  }
 
   const supabase = await createAdminSupabaseClient();
   const tab = searchParams.tab ?? 'listings';
@@ -81,13 +70,8 @@ export default async function AdminPage({
   const conversations = (chatsRes.data ?? []) as unknown as Conversation[];
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopNav user={currentUser} />
-      <header className="border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="text-lg font-bold text-foreground">{t('title')}</h1>
-        </div>
-      </header>
+    <div>
+      <h1 className="mb-4 text-lg font-bold text-foreground">{t('title')}</h1>
       <AdminDashboard
         listings={listings}
         storeRequests={storeRequests}

@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: string
+          ip: string | null
+          reason: string | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bids: {
         Row: {
           amount: number
@@ -447,6 +497,7 @@ export type Database = {
       }
       users: {
         Row: {
+          admin_role: Database["public"]["Enums"]["admin_role"] | null
           avatar_url: string | null
           badge: string | null
           created_at: string
@@ -461,6 +512,7 @@ export type Database = {
           trust_score: number
         }
         Insert: {
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           badge?: string | null
           created_at?: string
@@ -475,6 +527,7 @@ export type Database = {
           trust_score?: number
         }
         Update: {
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           badge?: string | null
           created_at?: string
@@ -495,15 +548,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_moderate: { Args: never; Returns: boolean }
       close_due_auctions: { Args: never; Returns: number }
+      current_admin_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["admin_role"]
+      }
       finalize_auction: { Args: { p_listing_id: string }; Returns: undefined }
+      has_admin_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
       place_bid: {
         Args: { p_amount: number; p_listing_id: string }
         Returns: Json
       }
     }
     Enums: {
+      admin_role: "super_admin" | "moderator" | "support"
       auction_status: "scheduled" | "live" | "ended" | "cancelled"
       listing_category:
         | "electronics"
@@ -645,6 +706,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["super_admin", "moderator", "support"],
       auction_status: ["scheduled", "live", "ended", "cancelled"],
       listing_category: [
         "electronics",
