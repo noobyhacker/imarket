@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabaseClient';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import { getAvatarUrl, getSupabaseImageUrl, formatPrice } from '@/lib/utils';
+import ReportButton from '@/components/ReportButton';
 import type { Conversation, Message, UserProfile } from '@/types';
 
 interface ChatDetailClientProps {
@@ -63,6 +64,7 @@ export default function ChatDetailClient({
       text_original: text,
       text_translated: null,
       original_language: null,
+      removed: false,
       created_at: new Date().toISOString(),
       sender: currentUser,
     };
@@ -152,6 +154,7 @@ export default function ChatDetailClient({
             <Languages size={13} />
             {translateEnabled ? tTranslation('autoTranslateOn') : tTranslation('translate')}
           </button>
+          <ReportButton targetType="conversation" targetId={conversation.id} variant="icon" />
         </div>
 
         {/* Item banner — tapping navigates to the listing */}
@@ -181,8 +184,10 @@ export default function ChatDetailClient({
         <div className="mx-auto max-w-lg space-y-3">
           {messages.map((msg) => {
             const isMe = msg.sender_id === currentUser.id;
-            const displayText =
-              translateEnabled && msg.text_translated
+            const removed = (msg as { removed?: boolean }).removed;
+            const displayText = removed
+              ? t('messageRemoved')
+              : translateEnabled && msg.text_translated
                 ? msg.text_translated
                 : msg.text_original;
 
@@ -198,8 +203,8 @@ export default function ChatDetailClient({
                       : 'bg-secondary text-secondary-foreground rounded-bl-md'
                   }`}
                 >
-                  <p className="text-sm">{displayText}</p>
-                  {translateEnabled && msg.text_translated && msg.text_original !== msg.text_translated && (
+                  <p className={`text-sm ${removed ? 'italic opacity-70' : ''}`}>{displayText}</p>
+                  {!removed && translateEnabled && msg.text_translated && msg.text_original !== msg.text_translated && (
                     <p className={`mt-0.5 text-[10px] ${isMe ? 'text-primary-foreground/50' : 'text-muted-foreground'}`}>
                       {tTranslation('originalLanguage')}: {msg.text_original}
                     </p>

@@ -67,7 +67,8 @@
     "placeholder": "Type a message...",
     "activeNow": "Active now",
     "typing": "Typing...",
-    "seen": "Seen"
+    "seen": "Seen",
+    "messageRemoved": "[message removed by a moderator]"
   },
   "translation": {
     "showOriginal": "Show Original",
@@ -253,6 +254,26 @@
       "confirm": "Confirm",
       "status": { "scheduled": "Scheduled", "live": "Live", "ended": "Ended", "cancelled": "Cancelled" },
       "modalTitle": { "cancel": "Cancel auction", "voidbid": "Void bid", "extend": "Extend auction" }
+    },
+    "messages": {
+      "title": "Messaging moderation",
+      "privacyNote": "Only reported threads are shown. Opening a thread is recorded in the audit log.",
+      "empty": "No reported conversations.",
+      "openThread": "Open thread",
+      "removeMessage": "Remove message",
+      "warn": "Warn",
+      "suspendMessaging": "Suspend messaging",
+      "escalateBan": "Escalate to ban",
+      "resolve": "Resolve",
+      "reasonPlaceholder": "Reason (required)…",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "byReporter": "by {name}",
+      "subject": "about {name}",
+      "status": { "open": "Open", "in_review": "In review", "actioned": "Actioned", "dismissed": "Dismissed" },
+      "reasons": { "spam": "Spam", "scam": "Scam", "prohibited": "Prohibited item", "counterfeit": "Counterfeit", "harassment": "Harassment", "wrong_category": "Wrong category", "other": "Other" },
+      "targets": { "message": "Message", "conversation": "Conversation" },
+      "modalTitle": { "warn": "Warn user", "suspend": "Suspend messaging", "remove": "Remove message", "ban": "Ban user", "resolve": "Resolve report" }
     },
     "nav": {
       "dashboard": "Dashboard",

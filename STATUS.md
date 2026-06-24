@@ -183,4 +183,10 @@ Enforced by `assertRole(min)` (`lib/adminAuth.ts`, role rank support<moderator<s
 - **Actions (`lib/adminActions.ts`)**: `adminCancelAuction`/`adminVoidBid`/`adminExtendAuction`/`adminForceCloseAuction` call the RPCs via the session client + audit each.
 - **UI** (`/admin/auctions`): scheduled/live/ended/cancelled list with current bid, bidder count, ending time, expandable bid history (per-bid void), and cancel/extend/force-close actions. Heuristic flags any auction where one bidder placed ≥5 bids. Nav entry added.
 - **Verification**: `npm run build` passes. SQL proof — voiding the top bid recomputed the high bid to the next-highest and reassigned the winner.
+
+## Phase 8 — Messaging Moderation (report-driven) ✅
+- **Migration `0014_messaging_moderation.sql`**: `messages.removed` (soft-removal) + `users.messaging_suspended` (narrower than a full ban); `can_message(uid)` helper (active AND not messaging-suspended); messages INSERT policy rewritten to use it.
+- **User-facing**: conversation-level `ReportButton` added to the chat header; removed messages render as a localized placeholder for participants.
+- **Admin** (`/admin/messages`): **report-driven only** (lists reports with target message/conversation — no blanket DM access). Actions: open thread (the existing read-only `/admin/chat/[id]`, now **gated via `getAdminContext` and logged on open**), remove message, warn user, suspend messaging, escalate→ban, resolve report. Actions: `adminWarnUser`/`adminSuspendMessaging`/`adminUnsuspendMessaging`/`adminRemoveMessage` — reason-gated + audited.
+- **Verification**: `npm run build` passes. SQL proof — a messaging-suspended user returns `can_message=false` while remaining `is_user_active=true`.
 - **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).

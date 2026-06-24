@@ -67,7 +67,8 @@
     "placeholder": "Введите сообщение...",
     "activeNow": "В сети",
     "typing": "Печатает...",
-    "seen": "Прочитано"
+    "seen": "Прочитано",
+    "messageRemoved": "[сообщение удалено модератором]"
   },
   "translation": {
     "showOriginal": "Показать оригинал",
@@ -253,6 +254,26 @@
       "confirm": "Подтвердить",
       "status": { "scheduled": "Запланирован", "live": "Идёт", "ended": "Завершён", "cancelled": "Отменён" },
       "modalTitle": { "cancel": "Отменить аукцион", "voidbid": "Аннулировать ставку", "extend": "Продлить аукцион" }
+    },
+    "messages": {
+      "title": "Модерация сообщений",
+      "privacyNote": "Показаны только обжалованные диалоги. Открытие диалога фиксируется в журнале.",
+      "empty": "Нет обжалованных диалогов.",
+      "openThread": "Открыть диалог",
+      "removeMessage": "Удалить сообщение",
+      "warn": "Предупредить",
+      "suspendMessaging": "Запретить переписку",
+      "escalateBan": "Заблокировать",
+      "resolve": "Решить",
+      "reasonPlaceholder": "Причина (обязательно)…",
+      "cancel": "Отмена",
+      "confirm": "Подтвердить",
+      "byReporter": "от {name}",
+      "subject": "о {name}",
+      "status": { "open": "Открыта", "in_review": "На проверке", "actioned": "Меры приняты", "dismissed": "Отклонена" },
+      "reasons": { "spam": "Спам", "scam": "Мошенничество", "prohibited": "Запрещённый товар", "counterfeit": "Подделка", "harassment": "Домогательство", "wrong_category": "Неверная категория", "other": "Другое" },
+      "targets": { "message": "Сообщение", "conversation": "Диалог" },
+      "modalTitle": { "warn": "Предупредить", "suspend": "Запретить переписку", "remove": "Удалить сообщение", "ban": "Заблокировать", "resolve": "Решение по жалобе" }
     },
     "nav": {
       "dashboard": "Сводка",

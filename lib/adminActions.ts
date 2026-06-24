@@ -382,3 +382,45 @@ export async function adminForceCloseAuction(id: string) {
   revalidatePath('/admin/auctions');
   revalidatePath(`/listing/${id}`);
 }
+
+// ── Messaging moderation (Phase 8) ──────────────────────────────────────────
+
+export async function adminWarnUser(userId: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const supabase = await createAdminSupabaseClient();
+  await notifyUser(supabase, userId, 'warning', 'Warning from moderators', reason.trim());
+  await logAdminAction({ action: 'user.warn', targetType: 'user', targetId: userId, reason: reason.trim() });
+  revalidatePath('/admin/messages');
+}
+
+export async function adminSuspendMessaging(userId: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('users').update({ messaging_suspended: true }).eq('id', userId);
+  if (error) throw error;
+  await notifyUser(supabase, userId, 'messaging_suspended', 'Messaging suspended', reason.trim());
+  await logAdminAction({ action: 'user.suspend_messaging', targetType: 'user', targetId: userId, reason: reason.trim() });
+  revalidatePath('/admin/messages');
+}
+
+export async function adminUnsuspendMessaging(userId: string) {
+  await assertRole('moderator');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('users').update({ messaging_suspended: false }).eq('id', userId);
+  if (error) throw error;
+  await logAdminAction({ action: 'user.unsuspend_messaging', targetType: 'user', targetId: userId });
+  revalidatePath('/admin/messages');
+}
+
+/** Soft-remove a single message (kept in the table, shown as a placeholder). */
+export async function adminRemoveMessage(messageId: string, reason: string) {
+  await assertRole('moderator');
+  if (!reason?.trim()) throw new Error('A reason is required');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('messages').update({ removed: true }).eq('id', messageId);
+  if (error) throw error;
+  await logAdminAction({ action: 'message.remove', targetType: 'message', targetId: messageId, reason: reason.trim() });
+  revalidatePath('/admin/messages');
+}

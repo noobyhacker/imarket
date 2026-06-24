@@ -276,6 +276,7 @@ export type Database = {
           created_at: string
           id: string
           original_language: string | null
+          removed: boolean
           sender_id: string
           text_original: string
           text_translated: string | null
@@ -285,6 +286,7 @@ export type Database = {
           created_at?: string
           id?: string
           original_language?: string | null
+          removed?: boolean
           sender_id: string
           text_original: string
           text_translated?: string | null
@@ -294,6 +296,7 @@ export type Database = {
           created_at?: string
           id?: string
           original_language?: string | null
+          removed?: boolean
           sender_id?: string
           text_original?: string
           text_translated?: string | null
@@ -565,6 +568,7 @@ export type Database = {
           language: string
           languages: string[]
           location: string | null
+          messaging_suspended: boolean
           nickname: string
           review_count: number
           status_reason: string | null
@@ -583,6 +587,7 @@ export type Database = {
           language?: string
           languages?: string[]
           location?: string | null
+          messaging_suspended?: boolean
           nickname: string
           review_count?: number
           status_reason?: string | null
@@ -601,6 +606,7 @@ export type Database = {
           language?: string
           languages?: string[]
           location?: string | null
+          messaging_suspended?: boolean
           nickname?: string
           review_count?: number
           status_reason?: string | null
@@ -619,6 +625,7 @@ export type Database = {
       admin_force_close: { Args: { p_id: string }; Returns: Json }
       admin_force_logout: { Args: { target: string }; Returns: undefined }
       admin_void_bid: { Args: { p_bid_id: string; p_reason: string }; Returns: Json }
+      can_message: { Args: { uid: string }; Returns: boolean }
       can_moderate: { Args: never; Returns: boolean }
       close_due_auctions: { Args: never; Returns: number }
       current_admin_role: {

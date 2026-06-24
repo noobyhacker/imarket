@@ -67,7 +67,8 @@
     "placeholder": "메시지를 입력하세요...",
     "activeNow": "활성",
     "typing": "입력 중...",
-    "seen": "읽음"
+    "seen": "읽음",
+    "messageRemoved": "[관리자가 삭제한 메시지]"
   },
   "translation": {
     "showOriginal": "원문 보기",
@@ -253,6 +254,26 @@
       "confirm": "확인",
       "status": { "scheduled": "예정", "live": "진행중", "ended": "종료", "cancelled": "취소됨" },
       "modalTitle": { "cancel": "경매 취소", "voidbid": "입찰 무효", "extend": "경매 연장" }
+    },
+    "messages": {
+      "title": "메시지 관리",
+      "privacyNote": "신고된 대화만 표시됩니다. 대화 열람은 감사 로그에 기록됩니다.",
+      "empty": "신고된 대화가 없습니다.",
+      "openThread": "대화 열기",
+      "removeMessage": "메시지 삭제",
+      "warn": "경고",
+      "suspendMessaging": "메시지 정지",
+      "escalateBan": "차단으로 격상",
+      "resolve": "처리",
+      "reasonPlaceholder": "사유 (필수)…",
+      "cancel": "취소",
+      "confirm": "확인",
+      "byReporter": "신고자: {name}",
+      "subject": "대상: {name}",
+      "status": { "open": "접수", "in_review": "검토중", "actioned": "조치완료", "dismissed": "기각" },
+      "reasons": { "spam": "스팸", "scam": "사기", "prohibited": "금지 품목", "counterfeit": "위조품", "harassment": "괴롭힘", "wrong_category": "잘못된 분류", "other": "기타" },
+      "targets": { "message": "메시지", "conversation": "대화" },
+      "modalTitle": { "warn": "사용자 경고", "suspend": "메시지 정지", "remove": "메시지 삭제", "ban": "사용자 차단", "resolve": "신고 처리" }
     },
     "nav": {
       "dashboard": "대시보드",
