@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getListingById, getListingsBySeller, getCurrentUser } from '@/lib/queries';
+import { getListingById, getListingsBySeller, getCurrentUser, getIsListingSaved } from '@/lib/queries';
 import ListingDetailClient from '@/components/listing/ListingDetailClient';
 import type { Metadata } from 'next';
 
@@ -27,9 +27,10 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
   if (!listing) notFound();
 
-  const relatedListings = listing.user_id
-    ? await getListingsBySeller(listing.user_id).catch(() => [])
-    : [];
+  const [relatedListings, initialSaved] = await Promise.all([
+    listing.user_id ? getListingsBySeller(listing.user_id).catch(() => []) : Promise.resolve([]),
+    user ? getIsListingSaved(user.id, listing.id).catch(() => false) : Promise.resolve(false),
+  ]);
 
   const otherListings = relatedListings.filter((l) => l.id !== listing.id).slice(0, 4);
 
@@ -38,6 +39,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
       listing={listing}
       relatedListings={otherListings}
       currentUser={user}
+      initialSaved={initialSaved}
       chatLabel={t('chatWithSeller')}
       relatedLabel={t('relatedListings')}
     />

@@ -14,6 +14,7 @@ interface ListingDetailClientProps {
   listing: Listing;
   relatedListings: Listing[];
   currentUser: UserProfile | null;
+  initialSaved?: boolean;
   chatLabel: string;
   relatedLabel: string;
 }
@@ -22,14 +23,16 @@ export default function ListingDetailClient({
   listing,
   relatedListings,
   currentUser,
+  initialSaved = false,
   chatLabel,
   relatedLabel,
 }: ListingDetailClientProps) {
   const router = useRouter();
   const tCategories = useTranslations('categories');
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(initialSaved);
   const [activeImage, setActiveImage] = useState(0);
   const [startingChat, setStartingChat] = useState(false);
+  const [shareMsg, setShareMsg] = useState('');
   const [listingStatus, setListingStatus] = useState(listing.status);
   const [toggling, setToggling] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -53,6 +56,22 @@ export default function ListingDetailClient({
   const images = listing.images?.length
     ? listing.images.map(getSupabaseImageUrl)
     : [];
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = { title: listing.title_original, text: listing.title_original, url };
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareMsg('Link copied');
+      setTimeout(() => setShareMsg(''), 2000);
+    } catch {
+      // User cancelled share sheet or clipboard blocked — no-op
+    }
+  };
 
   const handleSave = async () => {
     if (!currentUser) { router.push('/login'); return; }
@@ -131,7 +150,11 @@ export default function ListingDetailClient({
             <ArrowLeft size={18} />
           </button>
           <div className="flex gap-2">
-            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm">
+            <button
+              onClick={handleShare}
+              aria-label="Share"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-transform active:scale-90"
+            >
               <Share2 size={16} />
             </button>
             <button
@@ -142,6 +165,12 @@ export default function ListingDetailClient({
             </button>
           </div>
         </div>
+
+        {shareMsg && (
+          <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-full bg-foreground/90 px-3 py-1.5 text-xs font-semibold text-background">
+            {shareMsg}
+          </div>
+        )}
 
         {/* Image thumbnails */}
         {images.length > 1 && (

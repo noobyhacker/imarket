@@ -127,6 +127,17 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   return getUserProfile(user.id);
 }
 
+export async function getIsListingSaved(userId: string, listingId: string): Promise<boolean> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('saved_listings')
+    .select('listing_id')
+    .eq('user_id', userId)
+    .eq('listing_id', listingId)
+    .maybeSingle();
+  return !!data;
+}
+
 export async function getSavedListings(userId: string): Promise<Listing[]> {
   const supabase = await createServerSupabaseClient();
 
