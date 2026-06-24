@@ -5,6 +5,6 @@
   "installCommand": "npm install",
   "regions": ["icn1"],
   "crons": [
-    { "path": "/api/cron/close-auctions", "schedule": "* * * * *" }
+    { "path": "/api/cron/close-auctions", "schedule": "0 0 * * *" }
   ]
 }

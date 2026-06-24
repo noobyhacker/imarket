@@ -10,7 +10,9 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const auth = request.headers.get('authorization');
   const secret = process.env.CRON_SECRET;
-  if (secret && auth !== `Bearer ${secret}`) {
+  // Require the secret: Vercel auto-sends `Authorization: Bearer <CRON_SECRET>`
+  // when the env var is set. If it's missing or wrong, the endpoint stays closed.
+  if (!secret || auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
