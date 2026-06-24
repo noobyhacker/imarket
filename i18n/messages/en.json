@@ -122,6 +122,22 @@
     "email": "Email",
     "joinedDate": "Joined",
     "noData": "No data",
+    "dashboard": {
+      "totalUsers": "Total users",
+      "signups7d": "+{count} this week",
+      "activeListings": "Active listings",
+      "liveAuctions": "Live auctions",
+      "openReports": "Open reports",
+      "flaggedUsers": "Suspended / banned",
+      "queuesTitle": "Queues",
+      "pendingStores": "Pending stores",
+      "reviewListings": "Listings",
+      "users": "Users",
+      "chats": "Chats",
+      "auditLog": "Audit log",
+      "signupsTrend": "Signups (30 days)",
+      "listingsTrend": "New listings (30 days)"
+    },
     "nav": {
       "dashboard": "Dashboard",
       "audit": "Audit Log",

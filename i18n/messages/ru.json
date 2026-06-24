@@ -122,6 +122,22 @@
     "email": "Эл. почта",
     "joinedDate": "Регистрация",
     "noData": "Нет данных",
+    "dashboard": {
+      "totalUsers": "Всего пользователей",
+      "signups7d": "+{count} за неделю",
+      "activeListings": "Активные объявления",
+      "liveAuctions": "Активные аукционы",
+      "openReports": "Открытые жалобы",
+      "flaggedUsers": "Заблокированные",
+      "queuesTitle": "Очереди",
+      "pendingStores": "Магазины на рассмотрении",
+      "reviewListings": "Объявления",
+      "users": "Пользователи",
+      "chats": "Чаты",
+      "auditLog": "Журнал действий",
+      "signupsTrend": "Регистрации (30 дней)",
+      "listingsTrend": "Новые объявления (30 дней)"
+    },
     "nav": {
       "dashboard": "Сводка",
       "audit": "Журнал действий",

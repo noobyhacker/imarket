@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { createAdminSupabaseClient } from '@/lib/supabaseServer';
 import AdminDashboard from '@/components/admin/AdminDashboard';
+import DashboardSummary from '@/components/admin/DashboardSummary';
+import { getAdminKpis, getAdminTrends } from '@/lib/adminQueries';
 import type { Conversation, Listing, StoreRequest, UserProfile } from '@/types';
 
 // Access is enforced by app/admin/layout.tsx (segment-wide gate).
@@ -10,6 +12,8 @@ export default async function AdminPage({
   searchParams: { tab?: string; page?: string; q?: string };
 }) {
   const t = await getTranslations('admin');
+
+  const [kpis, trends] = await Promise.all([getAdminKpis(), getAdminTrends(30)]);
 
   const supabase = await createAdminSupabaseClient();
   const tab = searchParams.tab ?? 'listings';
@@ -72,6 +76,7 @@ export default async function AdminPage({
   return (
     <div>
       <h1 className="mb-4 text-lg font-bold text-foreground">{t('title')}</h1>
+      <DashboardSummary kpis={kpis} trends={trends} />
       <AdminDashboard
         listings={listings}
         storeRequests={storeRequests}

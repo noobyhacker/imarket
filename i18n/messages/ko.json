@@ -122,6 +122,22 @@
     "email": "이메일",
     "joinedDate": "가입일",
     "noData": "데이터 없음",
+    "dashboard": {
+      "totalUsers": "전체 사용자",
+      "signups7d": "이번 주 +{count}",
+      "activeListings": "판매중 상품",
+      "liveAuctions": "진행중 경매",
+      "openReports": "미처리 신고",
+      "flaggedUsers": "정지 / 차단",
+      "queuesTitle": "대기열",
+      "pendingStores": "대기중 상점",
+      "reviewListings": "상품",
+      "users": "사용자",
+      "chats": "채팅",
+      "auditLog": "감사 로그",
+      "signupsTrend": "가입 (30일)",
+      "listingsTrend": "신규 상품 (30일)"
+    },
     "nav": {
       "dashboard": "대시보드",
       "audit": "감사 로그",
