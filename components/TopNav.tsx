@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Languages, Settings, ShieldCheck, LogOut, User, MessageCircle } from 'lucide-react';
+import { MapPin, Languages, Settings, ShieldCheck, LogOut, User, MessageCircle, Gavel } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState, useRef, useEffect } from 'react';
@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabaseClient';
 import type { UserProfile } from '@/types';
 import { getAvatarUrl } from '@/lib/utils';
 import ListingFilters from '@/components/listing/ListingFilters';
+import NotificationBell from '@/components/NotificationBell';
 
 interface TopNavProps {
   user: UserProfile | null;
@@ -116,6 +117,18 @@ export default function TopNav({ user }: TopNavProps) {
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-2">
+            <button
+              onClick={() => router.push('/auctions')}
+              aria-label="Auctions"
+              className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                pathname.startsWith('/auctions') ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary text-foreground'
+              }`}
+            >
+              <Gavel size={18} />
+            </button>
+
+            {user && <NotificationBell userId={user.id} />}
+
             {user && (
               <button
                 onClick={() => router.push('/chat')}

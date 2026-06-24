@@ -5,9 +5,46 @@ export type { Tables, TablesInsert, TablesUpdate, Enums } from './database.types
 // ── Convenience row types ──────────────────────────────────
 import type { Tables as T } from './database.types';
 
-// `origin_country_code` is added in migration 0001 (Phase 2) and is not yet in the
-// generated database.types.ts (types can't be regenerated against the live project here).
-export type Listing        = T<'listings'>  & { seller?: UserProfile; origin_country_code?: string | null };
+// Columns added in migrations 0001–0003 are not yet in the generated
+// database.types.ts (types can't be regenerated against the live project here),
+// so they are augmented onto the convenience types below.
+export type SaleType      = 'fixed' | 'auction';
+export type AuctionStatus = 'scheduled' | 'live' | 'ended' | 'cancelled';
+
+export type Listing        = T<'listings'>  & {
+  seller?: UserProfile;
+  // Phase 2
+  origin_country_code?: string | null;
+  // Phase 3 — auctions
+  sale_type?: SaleType;
+  starting_price?: number | null;
+  bid_increment?: number | null;
+  auction_start?: string | null;
+  auction_end?: string | null;
+  current_bid?: number | null;
+  current_winner_id?: string | null;
+  auction_status?: AuctionStatus | null;
+};
+
+export interface Bid {
+  id: string;
+  listing_id: string;
+  bidder_id: string;
+  amount: number;
+  created_at: string;
+  bidder?: UserProfile;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+}
 export type UserProfile    = T<'users'>;
 export type Conversation   = T<'conversations'> & {
   listing?: Pick<T<'listings'>, 'id' | 'title_original' | 'title_translated' | 'images' | 'price'>;

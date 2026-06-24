@@ -2,6 +2,7 @@
   "nav": {
     "home": "Home",
     "sell": "Sell",
+    "auctions": "Auctions",
     "chat": "Chat",
     "profile": "My",
     "login": "Login",

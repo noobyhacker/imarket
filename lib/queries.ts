@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from './supabaseServer';
-import type { Listing, ListingCategory, SortOption, UserProfile } from '@/types';
+import type { Bid, Listing, ListingCategory, SortOption, UserProfile } from '@/types';
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
   const supabase = await createServerSupabaseClient();
@@ -91,6 +91,10 @@ export async function getListings({
 export async function getListingById(id: string): Promise<Listing | null> {
   const supabase = await createServerSupabaseClient();
 
+  // Lazy close-on-read: finalize the auction if it is past its end time.
+  // Security-definer RPC; no-ops for non-auctions or auctions not yet due.
+  await supabase.rpc('finalize_auction', { p_listing_id: id }).then(() => {}, () => {});
+
   const { data, error } = await supabase
     .from('listings')
     .select('*')
@@ -101,6 +105,57 @@ export async function getListingById(id: string): Promise<Listing | null> {
 
   const seller = data.user_id ? await getUserProfile(data.user_id).catch(() => null) : null;
   return { ...(data as Listing), seller: seller ?? undefined };
+}
+
+export async function getAuctions({
+  search,
+  category,
+  originCountries,
+}: {
+  search?: string;
+  category?: ListingCategory;
+  originCountries?: string[];
+} = {}): Promise<Listing[]> {
+  const supabase = await createServerSupabaseClient();
+
+  // Finalize any due auctions so they drop out of the live list.
+  await supabase.rpc('close_due_auctions').then(() => {}, () => {});
+
+  let query = supabase
+    .from('listings')
+    .select('*')
+    .eq('status', 'active')
+    .eq('sale_type', 'auction')
+    .in('auction_status', ['scheduled', 'live'])
+    .order('auction_end', { ascending: true });
+
+  if (search) {
+    query = query.or(`title_original.ilike.%${search}%,title_translated.ilike.%${search}%`);
+  }
+  if (category) query = query.eq('category', category);
+  if (originCountries && originCountries.length > 0) {
+    query = query.in('origin_country_code', originCountries);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const rows = (data ?? []) as Listing[];
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+  const sellers = await Promise.all(userIds.map((uid) => getUserProfile(uid).catch(() => null)));
+  const sellerById = new Map(sellers.filter(Boolean).map((u) => [u!.id, u!]));
+  return rows.map((r) => ({ ...r, seller: sellerById.get(r.user_id) })) as Listing[];
+}
+
+export async function getBids(listingId: string): Promise<Bid[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('bids')
+    .select('*, bidder:users(*)')
+    .eq('listing_id', listingId)
+    .order('amount', { ascending: false });
+  if (error) return [];
+  return (data ?? []) as unknown as Bid[];
 }
 
 export async function getListingsBySeller(

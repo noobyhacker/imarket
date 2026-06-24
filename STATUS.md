@@ -40,9 +40,19 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 
 > **MCP/DB note:** `.env.local` points at Supabase project `izwshmdscanpidkxrniu`, which is NOT in the account connected to the Supabase MCP (only *Webforge CRM* + *Forms* are). Migrations are therefore delivered as files to run manually, not applied via MCP. Reconnect the owning Supabase account to the MCP to restore auto-apply.
 
-## Phase 3 — Auctions
+## Phase 3 — Auctions (DONE)
 
-_Pending._
+- **Migration:** `supabase/migrations/0002_auctions.sql` — `sale_type`/`auction_status` enums; auction columns on `listings`; `bids` table (RLS); `notifications` table (RLS); `place_bid()` (atomic, row-locking, race-safe, writes outbid notifications); `finalize_auction()` + `close_due_auctions()` (security-definer close-out + winner/seller notifications); realtime publication for `bids` + `notifications`. **⚠ Run in Supabase SQL editor for `izwshmdscanpidkxrniu`.**
+- **Realtime:** `hooks/useRealtimeBids.ts`, `hooks/useRealtimeNotifications.ts`.
+- **Bidding:** `AuctionDetailClient` (countdown, current bid, history, place-bid via `place_bid` RPC with full validation + loading/disabled/error states). Listing page branches to it when `sale_type==='auction'`.
+- **Browse:** `/auctions` page (ending-soonest, reuses TopNav filters), `AuctionCard` with live countdown. `getAuctions()` + `getBids()` in `lib/queries.ts`.
+- **Create:** Fixed/Auction toggle in `CreateListingForm` with starting price, increment, start/end datetime + validation.
+- **Close-out:** lazy close-on-read (`finalize_auction` called in `getListingById`/`getAuctions`) + Vercel Cron backstop `/api/cron/close-auctions` (`CRON_SECRET`-gated) in `vercel.json`.
+- **Notifications:** in-app bell (`NotificationBell`) in TopNav with realtime unread badge + dropdown; reused for outbid / auction-won / auction-ended.
+- **Nav:** Auctions added to TopNav (Gavel) + BottomNav.
+
+> **⚠ Vercel cron cadence:** `vercel.json` uses `* * * * *` (every minute) — requires Vercel **Pro**. On Hobby, change to a daily schedule; lazy close-on-read still gives correct live UX.
+> **New env var:** `CRON_SECRET` (set in Vercel + `.env.local`).
 
 ## Phase 4 — Store owners
 

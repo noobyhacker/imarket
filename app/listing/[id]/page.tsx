@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getListingById, getListingsBySeller, getCurrentUser, getIsListingSaved } from '@/lib/queries';
+import { getListingById, getListingsBySeller, getCurrentUser, getIsListingSaved, getBids } from '@/lib/queries';
 import ListingDetailClient from '@/components/listing/ListingDetailClient';
+import AuctionDetailClient from '@/components/listing/AuctionDetailClient';
 import type { Metadata } from 'next';
 
 interface ListingPageProps {
@@ -26,6 +27,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
   ]);
 
   if (!listing) notFound();
+
+  if (listing.sale_type === 'auction') {
+    const bids = await getBids(listing.id).catch(() => []);
+    return <AuctionDetailClient listing={listing} initialBids={bids} currentUser={user} />;
+  }
 
   const [relatedListings, initialSaved] = await Promise.all([
     listing.user_id ? getListingsBySeller(listing.user_id).catch(() => []) : Promise.resolve([]),

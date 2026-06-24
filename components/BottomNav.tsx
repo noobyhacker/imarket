@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, PlusCircle, MessageCircle, User } from 'lucide-react';
+import { Home, PlusCircle, MessageCircle, Gavel } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -11,6 +11,7 @@ export default function BottomNav() {
 
   const navItems = [
     { path: '/', icon: Home, label: t('home') },
+    { path: '/auctions', icon: Gavel, label: t('auctions') },
     { path: '/create', icon: PlusCircle, label: t('sell') },
     { path: '/chat', icon: MessageCircle, label: t('chat') },
   ];

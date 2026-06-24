@@ -33,8 +33,13 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   const t = useTranslations('create');
   const tCategories = useTranslations('categories');
 
+  const [saleType, setSaleType] = useState<'fixed' | 'auction'>('fixed');
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
+  const [startingPrice, setStartingPrice] = useState('');
+  const [bidIncrement, setBidIncrement] = useState('1000');
+  const [auctionStart, setAuctionStart] = useState('');
+  const [auctionEnd, setAuctionEnd] = useState('');
   const [category, setCategory] = useState<ListingCategory | ''>('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -74,9 +79,24 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
   };
 
   const handlePost = async () => {
-    if (!title || !price || !category || !location || !description) {
+    const baseMissing = !title || !category || !location || !description;
+    if (saleType === 'fixed' && (baseMissing || !price)) {
       setError('Please fill in all fields');
       return;
+    }
+    if (saleType === 'auction') {
+      if (baseMissing || !startingPrice || !auctionEnd) {
+        setError('Fill in title, category, location, description, starting price, and end time');
+        return;
+      }
+      if (new Date(auctionEnd).getTime() <= Date.now()) {
+        setError('Auction end time must be in the future');
+        return;
+      }
+      if (auctionStart && new Date(auctionStart).getTime() >= new Date(auctionEnd).getTime()) {
+        setError('Auction start must be before end');
+        return;
+      }
     }
     if (languages.length === 0) {
       setError('Please select at least one language');
@@ -128,6 +148,9 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
       }
 
       // 3. Insert listing
+      const isAuction = saleType === 'auction';
+      const startsInFuture = isAuction && auctionStart && new Date(auctionStart).getTime() > Date.now();
+
       const { data: listing, error: insertError } = await supabase
         .from('listings')
         .insert({
@@ -136,7 +159,7 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           title_translated: titleTranslated,
           description_original: description,
           description_translated: descTranslated,
-          price: parseInt(price),
+          price: isAuction ? parseInt(startingPrice) : parseInt(price),
           category: category as ListingCategory,
           location,
           english_friendly: languages.includes('English'),
@@ -145,6 +168,12 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           origin_country_code: originCountry,
           images: imagePaths,
           status: 'active',
+          sale_type: saleType,
+          starting_price: isAuction ? parseInt(startingPrice) : null,
+          bid_increment: isAuction ? parseInt(bidIncrement || '1000') : null,
+          auction_start: isAuction && auctionStart ? new Date(auctionStart).toISOString() : null,
+          auction_end: isAuction ? new Date(auctionEnd).toISOString() : null,
+          auction_status: isAuction ? (startsInFuture ? 'scheduled' : 'live') : null,
         })
         .select('id')
         .single();
@@ -224,17 +253,59 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
           />
         </div>
 
+        {/* Sale type toggle */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('priceLabel')}</label>
-          <input
-            value={price}
-            onChange={(e) => setPrice(e.target.value.replace(/\D/g, ''))}
-            placeholder={t('pricePlaceholder')}
-            type="text"
-            inputMode="numeric"
-            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
-          />
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sale type</label>
+          <div className="grid grid-cols-2 gap-2">
+            {(['fixed', 'auction'] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setSaleType(type)}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                  saleType === type ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                }`}
+              >
+                {type === 'fixed' ? 'Fixed price' : 'Auction'}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {saleType === 'fixed' ? (
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('priceLabel')}</label>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value.replace(/\D/g, ''))}
+              placeholder={t('pricePlaceholder')}
+              type="text"
+              inputMode="numeric"
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
+            />
+          </div>
+        ) : (
+          <div className="space-y-4 rounded-xl border border-border bg-secondary/30 p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Starting price (₩)</label>
+                <input value={startingPrice} onChange={(e) => setStartingPrice(e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="0" className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bid increment (₩)</label>
+                <input value={bidIncrement} onChange={(e) => setBidIncrement(e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="1000" className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary" />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Start time (optional)</label>
+              <input type="datetime-local" value={auctionStart} onChange={(e) => setAuctionStart(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">End time</label>
+              <input type="datetime-local" value={auctionEnd} onChange={(e) => setAuctionEnd(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary" />
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('categoryLabel')}</label>
@@ -306,7 +377,10 @@ export default function CreateListingForm({ userId }: CreateListingFormProps) {
 
         <button
           onClick={handlePost}
-          disabled={!title || !price || !category || !location || !description || languages.length === 0 || loading}
+          disabled={
+            !title || !category || !location || !description || languages.length === 0 || loading ||
+            (saleType === 'fixed' ? !price : (!startingPrice || !auctionEnd))
+          }
           className="mt-2 w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-all active:scale-[0.98] disabled:opacity-40"
         >
           {loading ? t('posting') : t('postButton')}
