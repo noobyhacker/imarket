@@ -4,7 +4,7 @@ import { createAdminSupabaseClient, createServerSupabaseClient } from '@/lib/sup
 import { revalidatePath } from 'next/cache';
 import { assertRole, type AdminRole } from '@/lib/adminAuth';
 import { logAdminAction } from '@/lib/auditLog';
-import type { ListingCategory, ReportStatus } from '@/types';
+import type { ListingCategory, ReportStatus, ReportReason } from '@/types';
 
 export async function adminDeleteListing(id: string, reason?: string) {
   await assertRole('moderator');
@@ -423,4 +423,63 @@ export async function adminRemoveMessage(messageId: string, reason: string) {
   if (error) throw error;
   await logAdminAction({ action: 'message.remove', targetType: 'message', targetId: messageId, reason: reason.trim() });
   revalidatePath('/admin/messages');
+}
+
+// ── Platform config & taxonomy (Phase 9, super_admin) ───────────────────────
+
+export async function adminAddBannedKeyword(keyword: string, category: ReportReason) {
+  const ctx = await assertRole('super_admin');
+  if (!keyword?.trim()) throw new Error('Keyword is required');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('banned_keywords').insert({ keyword: keyword.trim().toLowerCase(), category, created_by: ctx.userId });
+  if (error) throw error;
+  await logAdminAction({ action: 'config.add_keyword', targetType: 'banned_keyword', reason: keyword.trim(), after: { category } });
+  revalidatePath('/admin/settings');
+}
+
+export async function adminDeleteBannedKeyword(id: string) {
+  await assertRole('super_admin');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('banned_keywords').delete().eq('id', id);
+  if (error) throw error;
+  await logAdminAction({ action: 'config.delete_keyword', targetType: 'banned_keyword', targetId: id });
+  revalidatePath('/admin/settings');
+}
+
+export async function adminSetFeatureFlag(key: string, enabled: boolean, description?: string) {
+  const ctx = await assertRole('super_admin');
+  if (!key?.trim()) throw new Error('Key is required');
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('feature_flags').upsert(
+    { key: key.trim(), enabled, description: description ?? null, updated_by: ctx.userId, updated_at: new Date().toISOString() },
+    { onConflict: 'key' }
+  );
+  if (error) throw error;
+  await logAdminAction({ action: 'config.set_flag', targetType: 'feature_flag', targetId: key.trim(), after: { enabled } });
+  revalidatePath('/admin/settings');
+  revalidatePath('/', 'layout');
+}
+
+export async function adminUpsertConfig(key: string, value: string) {
+  const ctx = await assertRole('super_admin');
+  if (!key?.trim()) throw new Error('Key is required');
+  // Store the raw string as a JSON string value.
+  const supabase = await createAdminSupabaseClient();
+  const { error } = await supabase.from('platform_config').upsert(
+    { key: key.trim(), value: value as never, updated_by: ctx.userId, updated_at: new Date().toISOString() },
+    { onConflict: 'key' }
+  );
+  if (error) throw error;
+  await logAdminAction({ action: 'config.set', targetType: 'config', targetId: key.trim() });
+  revalidatePath('/admin/settings');
+}
+
+export async function adminRescanProhibited(): Promise<number> {
+  await assertRole('moderator');
+  const session = await createServerSupabaseClient();
+  const { data, error } = await session.rpc('admin_rescan_prohibited');
+  if (error) throw error;
+  await logAdminAction({ action: 'config.rescan_prohibited', after: { flagged: data ?? 0 } });
+  revalidatePath('/admin/moderation');
+  return (data as number) ?? 0;
 }

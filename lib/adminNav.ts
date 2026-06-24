@@ -19,6 +19,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/messages', key: 'messages', min: 'support' },
   { href: '/admin/users', key: 'users', min: 'support' },
   { href: '/admin/audit', key: 'audit', min: 'support' },
+  { href: '/admin/settings', key: 'settings', min: 'super_admin' },
 ];
 
 export function navItemsForRole(role: AdminRole): AdminNavItem[] {

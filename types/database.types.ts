@@ -64,6 +64,75 @@ export type Database = {
           },
         ]
       }
+      banned_keywords: {
+        Row: {
+          category: Database["public"]["Enums"]["report_reason"]
+          created_at: string
+          created_by: string | null
+          id: string
+          keyword: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["report_reason"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          keyword: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["report_reason"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          keyword?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          description: string | null
+          enabled: boolean
+          key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      platform_config: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json | null
+        }
+        Relationships: []
+      }
       bids: {
         Row: {
           amount: number
@@ -632,6 +701,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["admin_role"]
       }
+      admin_rescan_prohibited: { Args: never; Returns: number }
       finalize_auction: { Args: { p_listing_id: string }; Returns: undefined }
       has_admin_access: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }

@@ -275,6 +275,20 @@
       "targets": { "message": "Message", "conversation": "Conversation" },
       "modalTitle": { "warn": "Warn user", "suspend": "Suspend messaging", "remove": "Remove message", "ban": "Ban user", "resolve": "Resolve report" }
     },
+    "settings": {
+      "title": "Platform settings",
+      "forbidden": "Only super admins can access platform settings.",
+      "flagsTitle": "Feature flags",
+      "maintenanceMode": "Maintenance mode",
+      "keywordsTitle": "Prohibited keywords",
+      "keywordsHint": "New or edited listings matching a keyword are auto-flagged into the moderation queue.",
+      "keywordPlaceholder": "e.g. weapon",
+      "addKeyword": "Add",
+      "rescan": "Rescan listings",
+      "rescanResult": "Flagged {count} listing(s).",
+      "noKeywords": "No keywords yet.",
+      "noFlags": "No feature flags."
+    },
     "nav": {
       "dashboard": "Dashboard",
       "audit": "Audit Log",
@@ -303,6 +317,10 @@
       "prev": "Previous",
       "next": "Next"
     }
+  },
+  "maintenance": {
+    "title": "We'll be right back",
+    "body": "iMarket is undergoing scheduled maintenance. Please check back shortly."
   },
   "report": {
     "button": "Report",

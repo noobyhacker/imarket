@@ -275,6 +275,20 @@
       "targets": { "message": "메시지", "conversation": "대화" },
       "modalTitle": { "warn": "사용자 경고", "suspend": "메시지 정지", "remove": "메시지 삭제", "ban": "사용자 차단", "resolve": "신고 처리" }
     },
+    "settings": {
+      "title": "플랫폼 설정",
+      "forbidden": "최고 관리자만 플랫폼 설정에 접근할 수 있습니다.",
+      "flagsTitle": "기능 플래그",
+      "maintenanceMode": "점검 모드",
+      "keywordsTitle": "금지 키워드",
+      "keywordsHint": "키워드와 일치하는 신규/수정 상품은 자동으로 신고 대기열에 등록됩니다.",
+      "keywordPlaceholder": "예: 무기",
+      "addKeyword": "추가",
+      "rescan": "상품 재검사",
+      "rescanResult": "{count}개 상품을 신고했습니다.",
+      "noKeywords": "키워드가 없습니다.",
+      "noFlags": "기능 플래그가 없습니다."
+    },
     "nav": {
       "dashboard": "대시보드",
       "audit": "감사 로그",
@@ -303,6 +317,10 @@
       "prev": "이전",
       "next": "다음"
     }
+  },
+  "maintenance": {
+    "title": "잠시 후 다시 찾아뵙겠습니다",
+    "body": "iMarket이 정기 점검 중입니다. 잠시 후 다시 시도해 주세요."
   },
   "report": {
     "button": "신고",
