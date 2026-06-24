@@ -14,6 +14,15 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
   return data as UserProfile;
 }
 
+/** Batch-fetch seller profiles in a single query (avoids N+1). */
+async function getUserProfilesByIds(ids: string[]): Promise<Map<string, UserProfile>> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return new Map();
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase.from('users').select('*').in('id', unique);
+  return new Map(((data ?? []) as UserProfile[]).map((u) => [u.id, u]));
+}
+
 export async function getListings({
   search,
   category,
@@ -82,9 +91,7 @@ export async function getListings({
   if (error) throw error;
 
   const rows = (data ?? []) as Listing[];
-  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
-  const sellers = await Promise.all(userIds.map((id) => getUserProfile(id).catch(() => null)));
-  const sellerById = new Map(sellers.filter(Boolean).map((u) => [u!.id, u!]));
+  const sellerById = await getUserProfilesByIds(rows.map((r) => r.user_id));
   return rows.map((r) => ({ ...r, seller: sellerById.get(r.user_id) })) as Listing[];
 }
 
@@ -143,9 +150,7 @@ export async function getAuctions({
   if (error) throw error;
 
   const rows = (data ?? []) as Listing[];
-  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
-  const sellers = await Promise.all(userIds.map((uid) => getUserProfile(uid).catch(() => null)));
-  const sellerById = new Map(sellers.filter(Boolean).map((u) => [u!.id, u!]));
+  const sellerById = await getUserProfilesByIds(rows.map((r) => r.user_id));
   return rows.map((r) => ({ ...r, seller: sellerById.get(r.user_id) })) as Listing[];
 }
 

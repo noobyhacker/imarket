@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabaseClient';
 import { getAvatarUrl, getSupabaseImageUrl, formatRelativeTime } from '@/lib/utils';
 import type { Conversation } from '@/types';
 
@@ -12,6 +14,18 @@ interface ChatListClientProps {
 
 export default function ChatListClient({ conversations, currentUserId, emptyMessage }: ChatListClientProps) {
   const router = useRouter();
+
+  // Live-refresh the list when any of the user's conversations change
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`chat-list:${currentUserId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
+        router.refresh();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [currentUserId, router]);
 
   if (conversations.length === 0) {
     return (

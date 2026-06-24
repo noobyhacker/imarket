@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getCurrentUser } from '@/lib/queries';
 import ChatListClient from '@/components/chat/ChatListClient';
 import BottomNav from '@/components/BottomNav';
+import TopNav from '@/components/TopNav';
 
 export default async function ChatPage() {
   const t = await getTranslations('chat');
@@ -24,8 +25,9 @@ export default async function ChatPage() {
     .order('last_message_at', { ascending: false });
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
+    <div className="min-h-screen pb-20 sm:pb-0">
+      <TopNav user={user} />
+      <header className="border-b border-border bg-card/80 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-lg">
           <h1 className="text-lg font-bold text-foreground">{t('title')}</h1>
         </div>

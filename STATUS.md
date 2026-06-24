@@ -78,6 +78,12 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 - `npm run lint` — **ESLint is not configured** in this project (next lint prompts to set it up interactively); left as-is rather than introducing a config mid-build. Type-checking via `next build` covers correctness.
 - All new views built mobile-first (max-w-lg / responsive grids), usable at 375px.
 
+## Post-build fixes (chat + perf + nav)
+
+- **Chat live updates** — `messages`/`conversations` were never in the `supabase_realtime` publication (only existed as a schema comment), so realtime never fired. Added via migration `0004_realtime_chat.sql` (applied). Chat list now also live-refreshes via a `conversations` subscription in `ChatListClient`.
+- **Navbar on chat** — `/chat` had no `TopNav` on desktop (custom header + `sm:hidden` BottomNav), stranding users. Added `TopNav` to the chat list page; chat detail keeps its back button (→ `/chat`, which now has full nav).
+- **Loading speed** — `getListings`/`getAuctions` did N+1 seller lookups (one query per user); replaced with a single batched `getUserProfilesByIds` `.in()` query.
+
 ## Flagged items / deferred
 
 - **DB migrations not auto-applied** — Supabase MCP is connected to a different account than the app's project (`izwshmdscanpidkxrniu`). Run `supabase/migrations/0001–0003` in that project's SQL editor (in order). Features depending on new columns/tables stay inert until then.
@@ -86,3 +92,5 @@ Full app inventory performed. The app is essentially fully wired (~112 interacti
 - **Vercel cron cadence** — `vercel.json` uses every-minute (`* * * * *`), requires Pro; switch to daily on Hobby (lazy close-on-read still covers UX).
 - **New env var** — `CRON_SECRET` for `/api/cron/close-auctions`.
 - **ESLint** — not configured (pre-existing).
+- **`listings.languages` type mismatch (pre-existing bug, found during this build)** — the live DB column is `text` (single string), but the app inserts an array and filters with `.contains('languages', [...])`, and `types/database.types.ts` declares it `string[]`. Regenerating types from the live DB would type it `string | null` and break the build, so the generated types were **not** adopted wholesale; manual augmentations in `types/index.ts` remain the source for new columns. Fixing this properly means migrating the column to `text[]` (and backfilling) OR changing the code to treat languages as a single value — out of scope for these four phases; flagged for follow-up.
+- **DB migrations APPLIED** — 0001–0003 applied to project `izwshmdscanpidkxrniu` via Supabase MCP (after reconnecting the correct account) and verified; advisor shows only WARN-level lints (security-definer RPCs are intentional + internally guarded).
