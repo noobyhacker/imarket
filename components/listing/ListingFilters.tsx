@@ -212,7 +212,7 @@ export default function ListingFilters({ compact = false }: ListingFiltersProps)
           />
         </div>
       </div>
-      <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
+      <div className="flex flex-wrap gap-2 px-4 pb-3">
         {tabs.map((tab) => (
           <button
             key={tab.key}

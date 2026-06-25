@@ -123,7 +123,7 @@ export default function AuctionDetailClient({ listing, initialBids, currentUser 
       <div className="relative">
         {images.length > 0 ? (
           <div className="relative h-80 w-full bg-secondary sm:h-96">
-            <Image src={images[activeImage]} alt={listing.title_original} fill className="object-cover" priority />
+            <Image src={images[activeImage]} alt={listing.title_original} fill className="object-contain" priority />
           </div>
         ) : (
           <div className="h-80 w-full bg-muted sm:h-96" />

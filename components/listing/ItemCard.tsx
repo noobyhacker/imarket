@@ -48,13 +48,13 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
 
   return (
     <div className="flex w-full gap-3.5 border-b border-border px-4 py-3.5 transition-colors hover:bg-secondary/50 animate-fade-in">
-      <Link href={`/listing/${item.id}`} className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl">
+      <Link href={`/listing/${item.id}`} className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={item.title_original}
             fill
-            className="object-cover"
+            className="object-contain"
             sizes="112px"
           />
         ) : (

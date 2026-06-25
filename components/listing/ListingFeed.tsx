@@ -90,7 +90,7 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
         <Link href={`/listing/${item.id}`} className="block h-full w-full">
           {imageUrl ? (
-            <Image src={imageUrl} alt={item.title_original} fill className="object-cover transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw" />
+            <Image src={imageUrl} alt={item.title_original} fill className="object-contain transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw" />
           ) : (
             <div className="h-full w-full bg-muted" />
           )}

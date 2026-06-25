@@ -144,7 +144,7 @@ export default function ListingDetailClient({
               src={images[activeImage]}
               alt={listing.title_original}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>
@@ -303,7 +303,7 @@ export default function ListingDetailClient({
                         src={getSupabaseImageUrl(rel.images[0])}
                         alt={rel.title_original}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="(max-width: 640px) 50vw, 200px"
                       />
                     )}

@@ -140,7 +140,7 @@ export default function ProfileClient({
                         src={getSupabaseImageUrl(item.images[0])}
                         alt=""
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="56px"
                       />
                     )}

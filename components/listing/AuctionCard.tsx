@@ -36,7 +36,7 @@ export default function AuctionCard({ item }: { item: Listing }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
         {imageUrl ? (
-          <Image src={imageUrl} alt={item.title_original} fill className="object-cover transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 50vw,25vw" />
+          <Image src={imageUrl} alt={item.title_original} fill className="object-contain transition-transform duration-200 group-hover:scale-105" sizes="(max-width:640px) 50vw,25vw" />
         ) : (
           <div className="h-full w-full bg-muted" />
         )}
