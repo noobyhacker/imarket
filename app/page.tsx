@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getListings, getCurrentUser } from '@/lib/queries';
+import { getListings, getCurrentUser, getSavedListingIds } from '@/lib/queries';
 import ListingFeed from '@/components/listing/ListingFeed';
 import BottomNav from '@/components/BottomNav';
 import TopNav from '@/components/TopNav';
@@ -38,6 +38,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     getCurrentUser().catch(() => null),
   ]);
 
+  const savedIds = user ? await getSavedListingIds(user.id).catch(() => []) : [];
+
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
       <TopNav user={user} />
@@ -46,6 +48,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         emptyMessage={t('empty')}
         searchPlaceholder={t('search')}
         currentUserId={user?.id}
+        savedIds={savedIds}
       />
       <BottomNav />
     </div>

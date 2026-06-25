@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Store as StoreIcon, BadgeCheck } from 'lucide-react';
-import { getStoreById, getStoreListings, getCurrentUser } from '@/lib/queries';
+import { getStoreById, getStoreListings, getCurrentUser, getSavedListingIds } from '@/lib/queries';
 import TopNav from '@/components/TopNav';
 import BottomNav from '@/components/BottomNav';
 import ListingFeed from '@/components/listing/ListingFeed';
@@ -18,6 +18,7 @@ export default async function StorePage({ params }: StorePageProps) {
   if (!store) notFound();
 
   const listings = await getStoreListings(store.id).catch(() => []);
+  const savedIds = user ? await getSavedListingIds(user.id).catch(() => []) : [];
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0">
@@ -60,6 +61,7 @@ export default async function StorePage({ params }: StorePageProps) {
           emptyMessage="This store has no listings yet"
           searchPlaceholder=""
           currentUserId={user?.id}
+          savedIds={savedIds}
         />
       )}
 

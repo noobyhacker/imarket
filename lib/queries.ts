@@ -288,6 +288,16 @@ export async function getIsListingSaved(userId: string, listingId: string): Prom
   return !!data;
 }
 
+/** Just the ids the user has saved — used to render heart state in feeds. */
+export async function getSavedListingIds(userId: string): Promise<string[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from('saved_listings')
+    .select('listing_id')
+    .eq('user_id', userId);
+  return ((data ?? []) as { listing_id: string }[]).map((r) => r.listing_id);
+}
+
 export async function getSavedListings(userId: string): Promise<Listing[]> {
   const supabase = await createServerSupabaseClient();
 

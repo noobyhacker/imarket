@@ -86,15 +86,17 @@ export default function ListingDetailClient({
 
   const handleSave = async () => {
     if (!currentUser) { router.push('/login'); return; }
+    const next = !saved;
+    setSaved(next); // optimistic
     const supabase = createClient();
-    if (saved) {
-      await supabase.from('saved_listings').delete()
-        .eq('user_id', currentUser.id).eq('listing_id', listing.id);
-      setSaved(false);
-    } else {
-      await supabase.from('saved_listings').insert({ user_id: currentUser.id, listing_id: listing.id });
-      setSaved(true);
-    }
+    const { error } = next
+      ? await supabase.from('saved_listings').upsert(
+          { user_id: currentUser.id, listing_id: listing.id },
+          { onConflict: 'user_id,listing_id' }
+        )
+      : await supabase.from('saved_listings').delete()
+          .eq('user_id', currentUser.id).eq('listing_id', listing.id);
+    if (error) setSaved(!next); // roll back on failure
   };
 
   const handleChat = async () => {

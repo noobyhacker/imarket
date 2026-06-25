@@ -32,17 +32,21 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     if (!currentUserId) { router.push('/login'); return; }
+    if (saving) return;
+    const next = !saved;
+    setSaved(next); // optimistic
     setSaving(true);
     const supabase = createClient();
-    if (saved) {
-      await supabase.from('saved_listings').delete()
-        .eq('user_id', currentUserId).eq('listing_id', item.id);
-      setSaved(false);
-    } else {
-      await supabase.from('saved_listings').insert({ user_id: currentUserId, listing_id: item.id });
-      setSaved(true);
-    }
+    const { error } = next
+      ? await supabase.from('saved_listings').upsert(
+          { user_id: currentUserId, listing_id: item.id },
+          { onConflict: 'user_id,listing_id' }
+        )
+      : await supabase.from('saved_listings').delete()
+          .eq('user_id', currentUserId).eq('listing_id', item.id);
+    if (error) setSaved(!next); // roll back on failure
     setSaving(false);
   };
 
