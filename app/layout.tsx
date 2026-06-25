@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { isMaintenanceMode } from '@/lib/featureFlags';
@@ -9,6 +9,16 @@ import '../styles/globals.css';
 export const metadata: Metadata = {
   title: 'iMarket — Buy & Sell in Korea',
   description: 'The foreigner-friendly marketplace in Korea',
+};
+
+// Lock the viewport: prevents iOS input-focus zoom and pinch zoom, and makes
+// safe-area insets work on notched devices.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({

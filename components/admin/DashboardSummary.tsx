@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Users, Package, Gavel, Store, Flag, ShieldAlert, ScrollText, MessageSquare } from 'lucide-react';
+import { Users, UserCheck, Package, Gavel, Store, Flag, ShieldAlert, ScrollText, MessageSquare } from 'lucide-react';
 import type { AdminKpis, TrendPoint } from '@/lib/adminQueries';
 
 function Sparkline({ points, className = '' }: { points: TrendPoint[]; className?: string }) {
@@ -12,11 +12,31 @@ function Sparkline({ points, className = '' }: { points: TrendPoint[]; className
   const coords = points.map((p, i) => [i * step, h - (p.count / max) * (h - 4) - 2] as const);
   const line = coords.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
   const area = `${line} L${w},${h} L0,${h} Z`;
+  const last = coords[coords.length - 1];
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={`h-12 w-full ${className}`}>
       <path d={area} fill="currentColor" opacity={0.12} />
       <path d={line} fill="none" stroke="currentColor" strokeWidth={1.5} />
+      {last && <circle cx={last[0]} cy={last[1]} r={2.5} fill="currentColor" />}
     </svg>
+  );
+}
+
+function TrendCard({ label, points, totalLabel, latestLabel }: { label: string; points: TrendPoint[]; totalLabel: string; latestLabel: string }) {
+  const total = points.reduce((s, p) => s + p.count, 0);
+  const latest = points.length ? points[points.length - 1].count : 0;
+  const peak = points.reduce((m, p) => Math.max(m, p.count), 0);
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 text-primary">
+      <div className="mb-2 flex items-end justify-between">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold text-foreground">{total.toLocaleString()} <span className="text-xs font-medium text-muted-foreground">{totalLabel}</span></p>
+        </div>
+        <p className="text-xs text-muted-foreground">{latestLabel}: <span className="font-semibold text-foreground">{latest}</span> · peak {peak}</p>
+      </div>
+      <Sparkline points={points} />
+    </div>
   );
 }
 
@@ -30,6 +50,8 @@ export default async function DashboardSummary({ kpis, trends }: Props) {
 
   const stats = [
     { icon: Users, label: t('totalUsers'), value: kpis.totalUsers, sub: t('signups7d', { count: kpis.signups7d }) },
+    { icon: UserCheck, label: t('activeUsers'), value: kpis.activeUsers },
+    { icon: MessageSquare, label: t('chatsCount'), value: kpis.conversations },
     { icon: Package, label: t('activeListings'), value: kpis.activeListings },
     { icon: Gavel, label: t('liveAuctions'), value: kpis.liveAuctions },
     { icon: Flag, label: t('openReports'), value: kpis.openReports },
@@ -91,14 +113,8 @@ export default async function DashboardSummary({ kpis, trends }: Props) {
 
       {/* Trends */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-4 text-primary">
-          <p className="mb-1 text-xs font-medium text-muted-foreground">{t('signupsTrend')}</p>
-          <Sparkline points={trends.signups} />
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 text-primary">
-          <p className="mb-1 text-xs font-medium text-muted-foreground">{t('listingsTrend')}</p>
-          <Sparkline points={trends.listings} />
-        </div>
+        <TrendCard label={t('signupsTrend')} points={trends.signups} totalLabel={t('trendTotal')} latestLabel={t('trendLatest')} />
+        <TrendCard label={t('listingsTrend')} points={trends.listings} totalLabel={t('trendTotal')} latestLabel={t('trendLatest')} />
       </div>
     </section>
   );

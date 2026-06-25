@@ -31,7 +31,17 @@ export function useRealtimeBids(listingId: string, initialBids: Bid[]) {
 
           setBids((prev) => {
             if (prev.find((b) => b.id === newBid.id)) return prev;
-            return [{ ...newBid, bidder: (bidder ?? undefined) as Bid['bidder'] }, ...prev];
+            // Drop the optimistic placeholder this INSERT corresponds to so the
+            // bid isn't shown twice.
+            const withoutOptimistic = prev.filter(
+              (b) =>
+                !(
+                  b.id.startsWith('temp-') &&
+                  b.bidder_id === newBid.bidder_id &&
+                  b.amount === newBid.amount
+                )
+            );
+            return [{ ...newBid, bidder: (bidder ?? undefined) as Bid['bidder'] }, ...withoutOptimistic];
           });
         }
       )

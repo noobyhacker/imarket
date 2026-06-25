@@ -125,6 +125,10 @@
     "noData": "Нет данных",
     "dashboard": {
       "totalUsers": "Всего пользователей",
+      "activeUsers": "Активные пользователи",
+      "chatsCount": "Чаты",
+      "trendTotal": "всего",
+      "trendLatest": "сегодня",
       "signups7d": "+{count} за неделю",
       "activeListings": "Активные объявления",
       "liveAuctions": "Активные аукционы",

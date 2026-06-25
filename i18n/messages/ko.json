@@ -125,6 +125,10 @@
     "noData": "데이터 없음",
     "dashboard": {
       "totalUsers": "전체 사용자",
+      "activeUsers": "활성 사용자",
+      "chatsCount": "채팅",
+      "trendTotal": "합계",
+      "trendLatest": "오늘",
       "signups7d": "이번 주 +{count}",
       "activeListings": "판매중 상품",
       "liveAuctions": "진행중 경매",

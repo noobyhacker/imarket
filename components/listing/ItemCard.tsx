@@ -27,6 +27,9 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
     ? getSupabaseImageUrl(item.images[0])
     : null;
 
+  const isAuction = item.sale_type === 'auction';
+  const displayPrice = isAuction ? (item.current_bid ?? item.starting_price ?? item.price) : item.price;
+
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!currentUserId) { router.push('/login'); return; }
@@ -76,7 +79,12 @@ export default function ItemCard({ item, currentUserId, initialSaved = false }: 
           </div>
 
           <div>
-            <p className="text-lg font-bold text-foreground">{formatPrice(item.price)}</p>
+            {isAuction && (
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
+                {item.current_bid != null ? 'Auction · current bid' : 'Auction · starting'}
+              </p>
+            )}
+            <p className={`text-lg font-bold ${isAuction ? 'text-primary' : 'text-foreground'}`}>{formatPrice(displayPrice)}</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {item.english_friendly && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-trust-light px-2 py-0.5 text-[10px] font-semibold text-trust">

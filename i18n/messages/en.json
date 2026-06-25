@@ -125,6 +125,10 @@
     "noData": "No data",
     "dashboard": {
       "totalUsers": "Total users",
+      "activeUsers": "Active users",
+      "chatsCount": "Chats",
+      "trendTotal": "total",
+      "trendLatest": "today",
       "signups7d": "+{count} this week",
       "activeListings": "Active listings",
       "liveAuctions": "Live auctions",

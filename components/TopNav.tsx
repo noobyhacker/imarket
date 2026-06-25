@@ -10,6 +10,7 @@ import { getAvatarUrl } from '@/lib/utils';
 import ListingFilters from '@/components/listing/ListingFilters';
 import NotificationBell from '@/components/NotificationBell';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { emailInAllowlist } from '@/lib/adminEmails';
 
 interface TopNavProps {
@@ -28,7 +29,7 @@ export default function TopNav({ user }: TopNavProps) {
   const [translateEnabled, setTranslateEnabled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [location, setLocation] = useState<string>('');
-  const [totalUnread, setTotalUnread] = useState(0);
+  const totalUnread = useUnreadCount(user?.id);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -41,33 +42,6 @@ export default function TopNav({ user }: TopNavProps) {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
-
-  // Fetch + subscribe to total unread count across all conversations
-  useEffect(() => {
-    if (!user) return;
-    const client = createClient();
-
-    const fetchUnread = async () => {
-      const { data } = await client
-        .from('conversations')
-        .select('buyer_id, buyer_unread, seller_unread')
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-      if (!data) return;
-      const total = data.reduce((sum, c) => {
-        return sum + (c.buyer_id === user.id ? (c.buyer_unread ?? 0) : (c.seller_unread ?? 0));
-      }, 0);
-      setTotalUnread(total);
-    };
-
-    fetchUnread();
-
-    const channel = client
-      .channel('topnav-unread')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, fetchUnread)
-      .subscribe();
-
-    return () => { client.removeChannel(channel); };
-  }, [user?.id]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -97,9 +71,9 @@ export default function TopNav({ user }: TopNavProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 py-3">
+        <div className="flex items-center gap-3 py-2 sm:gap-4 sm:py-3">
           <button onClick={() => router.push('/')} className="flex-shrink-0">
-            <img src="/logo.svg" alt="iMarket" className="h-10 w-auto" />
+            <img src="/logo.svg" alt="iMarket" className="h-8 w-auto sm:h-10" />
           </button>
 
           {location && (
@@ -113,10 +87,11 @@ export default function TopNav({ user }: TopNavProps) {
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-2">
+            {/* Auctions + Chat live in the bottom nav on mobile, so hide here. */}
             <button
               onClick={() => router.push('/auctions')}
               aria-label="Auctions"
-              className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+              className={`relative hidden h-9 w-9 items-center justify-center rounded-full transition-colors sm:flex ${
                 pathname.startsWith('/auctions') ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary text-foreground'
               }`}
             >
@@ -128,7 +103,7 @@ export default function TopNav({ user }: TopNavProps) {
             {user && (
               <button
                 onClick={() => router.push('/chat')}
-                className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                className={`relative hidden h-9 w-9 items-center justify-center rounded-full transition-colors sm:flex ${
                   pathname === '/chat' || pathname.startsWith('/chat/')
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-secondary text-foreground'

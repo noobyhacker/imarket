@@ -95,6 +95,9 @@ export default function AuctionDetailClient({ listing, initialBids, currentUser 
       { id: `temp-${Date.now()}`, listing_id: listing.id, bidder_id: currentUser.id, amount: value, created_at: new Date().toISOString(), bidder: currentUser },
       ...prev,
     ]);
+    // Invalidate the Router Cache so the catalog (/auctions, /) reflects the
+    // new current bid when the user navigates back.
+    router.refresh();
   };
 
   const handleChat = async () => {

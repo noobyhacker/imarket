@@ -69,6 +69,8 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
   const [saved, setSaved] = useState(initialSaved);
 
   const imageUrl = item.images?.[0] ? getSupabaseImageUrl(item.images[0]) : null;
+  const isAuction = item.sale_type === 'auction';
+  const displayPrice = isAuction ? (item.current_bid ?? item.starting_price ?? item.price) : item.price;
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -111,7 +113,7 @@ function ItemCardGrid({ item, currentUserId, initialSaved = false }: { item: Lis
         <p className="truncate text-sm font-semibold text-foreground">{item.title_original}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{item.location} · {formatRelativeTime(item.created_at)}</p>
         <div className="mt-2 flex items-center justify-between gap-1">
-          <p className="text-base font-bold text-foreground">{formatPrice(item.price)}</p>
+          <p className={`text-base font-bold ${isAuction ? 'text-primary' : 'text-foreground'}`}>{formatPrice(displayPrice)}</p>
           <div className="flex flex-wrap items-center justify-end gap-1">
             {item.origin_country_code && (
               <span className="flex items-center gap-0.5 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">

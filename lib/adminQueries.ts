@@ -22,6 +22,8 @@ function isoDaysAgo(days: number): string {
 
 export interface AdminKpis {
   totalUsers: number;
+  activeUsers: number;
+  conversations: number;
   signups24h: number;
   signups7d: number;
   activeListings: number;
@@ -37,6 +39,8 @@ export async function getAdminKpis(): Promise<AdminKpis> {
 
   const [
     totalUsers,
+    activeUsers,
+    conversations,
     signups24h,
     signups7d,
     activeListings,
@@ -46,6 +50,8 @@ export async function getAdminKpis(): Promise<AdminKpis> {
     flaggedUsers,
   ] = await Promise.all([
     safeCount(() => supabase.from('users').select('*', head)),
+    safeCount(() => supabase.from('users').select('*', head).eq('account_status', 'active')),
+    safeCount(() => supabase.from('conversations').select('*', head)),
     safeCount(() => supabase.from('users').select('*', head).gte('created_at', isoDaysAgo(1))),
     safeCount(() => supabase.from('users').select('*', head).gte('created_at', isoDaysAgo(7))),
     safeCount(() => supabase.from('listings').select('*', head).eq('status', 'active')),
@@ -55,7 +61,7 @@ export async function getAdminKpis(): Promise<AdminKpis> {
     safeCount(() => supabase.from('users').select('*', head).in('account_status', ['suspended', 'banned'])),
   ]);
 
-  return { totalUsers, signups24h, signups7d, activeListings, liveAuctions, pendingStores, openReports, flaggedUsers };
+  return { totalUsers, activeUsers, conversations, signups24h, signups7d, activeListings, liveAuctions, pendingStores, openReports, flaggedUsers };
 }
 
 export interface TrendPoint {
